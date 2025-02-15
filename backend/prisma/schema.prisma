@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  email        String        @unique
+  password     String
+  role         Role
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  isActive     Boolean?      @default(true)
+  phone        String?
+  orders       Order[]
+  transactions Transaction[]
+}
+
+model Inventory {
+  id              String        @id @default(cuid())
+  name            String
+  category        String
+  quantity        Int
+  threshold       Int
+  price           Float
+  expirationDate  DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  productId       String
+  reorderLevel    Int
+  supplierId      String?
+  reorderQuantity Int
+  dailyAvgSales   Float         @default(0)
+  lastRestockDate DateTime      @default(now())
+  maxCapacity     Int           @default(1000)
+  safetyStock     Int           @default(0)
+  demandForecast   Float?         @default(0)  // Additional forecast attribute
+  lastDemandUpdate DateTime?
+  product         Product       @relation(fields: [productId], references: [id])
+  supplier        Supplier?     @relation(fields: [supplierId], references: [id])
+  transactions    Transaction[]
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  productId       String
+  quantity        Int
+  total           Float
+  cashierId       String?
+  createdAt       DateTime        @default(now())
+  inventoryId     String?
+  transactionType TransactionType
+  cashier         User?           @relation(fields: [cashierId], references: [id])
+  inventory       Inventory?      @relation(fields: [inventoryId], references: [id])
+  product         Product         @relation(fields: [productId], references: [id])
+}
+
+model Supplier {
+  id          String       @id @default(cuid())
+  name        String?
+  contact     String
+  rating      Float?        @default(0)
+  createdAt   DateTime     @default(now())
+  email       String
+  location    String
+  password    String
+  role        SupplierRole
+  leadTime    Int?          @default(7)
+  reliability Float?       @default(0)
+  inventories Inventory[]
+  orders      Order[]
+  products    Product[]
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  name           String
+  price          Float
+  supplierId     String?
+  stock          Int
+  category       String
+  description    String?
+  SKU            String?          @unique
+  isPerishable   Boolean          @default(false)
+  seasonality    String?
+  shelfLife      Int?
+  isDemand       DemandType?       @default(MEDIUM)  // New attribute
+  inventories    Inventory[]
+  orders         OrderProduct[]
+  supplier       Supplier?        @relation(fields: [supplierId], references: [id])
+  qualityControl QualityControl[]
+  transactions   Transaction[]
+}
+enum DemandType {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Order {
+  id                String         @id @default(cuid())
+  customerId        String?
+  status            OrderStatus_new
+  totalAmount       Float
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  paymentStatus     PaymentStatus
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  deliveryDate      DateTime?
+  discount          Float?
+  orderType         OrderType
+  supplierId        String?
+  razorpaySignature String?
+  customer          User?          @relation(fields: [customerId], references: [id])
+  supplier          Supplier?      @relation(fields: [supplierId], references: [id])
+  products          OrderProduct[]
+
+  // New fields added to Order model
+  expectedDeliveryDate DateTime?
+  actualDeliveryDate   DateTime?
+  shippingDetails      Json?          // Change this line to Json
+  trackingNumber       String?
+  rejectionReason      String?
+  orderNotes           String?
+  documents            OrderDocument[]
+  qualityChecks        OrderQualityCheck[]
+  statusHistory        OrderStatusHistory[]
+}
+
+
+model OrderDocument {
+  id          String        @id @default(cuid())
+  orderId     String
+  documentType DocumentType
+  fileUrl     String
+  uploadedAt  DateTime      @default(now())
+
+  order       Order         @relation(fields: [orderId], references: [id])
+}
+
+model OrderQualityCheck {
+  id             String    @id @default(cuid())
+  orderId        String
+  checkDate      DateTime  @default(now())
+  checkedBy      String
+  status         QCStatus
+  comments       String?
+  parameters     Json      // Store specific quality parameters checked
+
+  order          Order     @relation(fields: [orderId], references: [id])
+}
+
+model OrderStatusHistory {
+  id           String      @id @default(cuid())
+  orderId      String
+  status       OrderStatus_new
+  changedBy    String
+  changedAt    DateTime    @default(now())
+  comments     String?
+
+  order        Order       @relation(fields: [orderId], references: [id])
+}
+
+model OrderProduct {
+  id                String   @id @default(cuid())
+  orderId           String
+  productId         String
+  quantity          Int
+  approvedPrice     Float?
+  createdAt         DateTime @default(now())
+  negotiationStatus String   @default("PENDING")
+  proposedPrice     Float?
+  requestedPrice    Float    @default(0)
+  updatedAt         DateTime @default(now()) @updatedAt
+  order             Order    @relation(fields: [orderId], references: [id])
+  product           Product  @relation(fields: [productId], references: [id])
+}
+
+model QualityControl {
+  id            Int      @id @default(autoincrement())
+  productId     String
+  sampleDetails String
+  status        QCStatus
+  Product       Product  @relation(fields: [productId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  SALES
+  SUPPLIER
+  CUSTOMER
+  CASHIER
+  QUALITY_CONTROL
+}
+
+enum TransactionType {
+  SALE
+  RETURN
+  RESTOCK
+}
+
+enum SupplierRole {
+  MANUFACTURER
+  WHOLESALER
+  DISTRIBUTOR
+}
+
+enum OrderType {
+  CUSTOMER
+  SUPPLIER
+  MANAGER
+  SYSTEM
+}
+
+enum DocumentType {
+  INVOICE
+  PACKING_LIST
+  QUALITY_CERTIFICATE
+  SHIPPING_DOCUMENT
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum QCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus_new {
+  STOCK_LOW
+  REORDER_REQUESTED
+  PRICE_PROPOSED
+  PRICE_NEGOTIATING
+  PRICE_APPROVED
+  IN_PRODUCTION
+  QC_PENDING
+  QC_APPROVED
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  REJECTED
+  CANCELLED
+  PENDING            // New status for pending orders
+  SUCCESSFULLY       // New status for successfully completed orders
+}
