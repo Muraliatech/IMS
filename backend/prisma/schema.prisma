@@ -9,14 +9,14 @@ datasource db {
 
 model User {
   id           String        @id @default(cuid())
-  username     String        @unique
+  username     String        
   email        String        @unique
   password     String
   role         Role
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   isActive     Boolean?      @default(true)
-  phone        String?
+  phone        String?       
   orders       Order[]
   transactions Transaction[]
 }
@@ -39,6 +39,7 @@ model Inventory {
   lastRestockDate DateTime      @default(now())
   maxCapacity     Int           @default(1000)
   safetyStock     Int           @default(0)
+  isDemand        DemandType       @default(LOW)
   demandForecast   Float?         @default(0)  // Additional forecast attribute
   lastDemandUpdate DateTime?
   product         Product       @relation(fields: [productId], references: [id])
@@ -89,13 +90,14 @@ model Product {
   isPerishable   Boolean          @default(false)
   seasonality    String?
   shelfLife      Int?
-  isDemand       DemandType?       @default(MEDIUM)  // New attribute
+  imageUrls      String[]         // 🔹 Store multiple image URLs  
   inventories    Inventory[]
   orders         OrderProduct[]
   supplier       Supplier?        @relation(fields: [supplierId], references: [id])
   qualityControl QualityControl[]
   transactions   Transaction[]
 }
+
 enum DemandType {
   LOW
   MEDIUM

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // src/routes/manager.ts
 const express_1 = require("express");
 const auth_1 = require("../middleware/auth");
+const uploadController_1 = require("../controllers/uploadController");
 const router = (0, express_1.Router)();
 // router.get("/inventory", checkAuth(["MANAGER"]), listInventory);
 // router.post("/inventory", checkAuth(["MANAGER"]), addInventory);
@@ -16,6 +17,7 @@ router.get("/inventoryItem/:id", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.g
 router.post("/addinventory", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.addInventoryItem);
 router.put("/inventory/:id", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.updateInventory);
 // router.delete("/inventory/:id", checkAuth(["MANAGER"]), deleteInventory);
+router.post("/upload", uploadController_1.uploadMiddleware, uploadController_1.uploadImage);
 router.post("/product", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.addProduct);
 router.post("/products", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.addProducts);
 router.get("/products", (0, auth_1.checkAuth)(["MANAGER"]), manager_1.getProducts);

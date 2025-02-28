@@ -21,6 +21,7 @@ interface JwtPayloadWithRole extends JwtPayload {
 export const checkAuth = (roles: (Role | SupplierRole)[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
+    console.log(token)
 
     if (!token) {
        res.status(401).json({ message: "Unauthorized" });
@@ -29,7 +30,7 @@ export const checkAuth = (roles: (Role | SupplierRole)[]) => {
 
     try {
       const user = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayloadWithRole;
-      
+      console.log(user)
 
       // Check if the user's role matches the required role
       console.log(user.role + " " + roles + " " + "user : "+user);

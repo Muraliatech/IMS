@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfile = exports.profile = exports.logout = exports.forgotPassword = exports.loginSupplier = exports.adminLogin = exports.login = exports.cusomerRegister = exports.supplierRegister = exports.adminregister = exports.register = void 0;
+exports.updateProfile = exports.profile = exports.logout = exports.forgotPassword = exports.loginSupplier = exports.adminLogin = exports.login = exports.supplierRegister = exports.adminregister = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
@@ -41,9 +41,17 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 role: 'CUSTOMER',
                 isActive: true
             },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                phone: true,
+                role: true,
+                isActive: true
+            }
         });
         const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
-        res.status(200).json({
+        res.status(201).json({
             message: "User created successfully",
             token,
             user
@@ -78,6 +86,14 @@ const adminregister = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 password: hashpassword,
                 role: 'ADMIN'
             },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                phone: true,
+                role: true,
+                isActive: true
+            }
         });
         const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
         res.status(200).json({
@@ -125,6 +141,12 @@ const supplierRegister = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 location,
                 role,
             },
+            select: {
+                id: true,
+                email: true,
+                contact: true,
+                role: true,
+            }
         });
         const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
         res.status(200).json({
@@ -143,52 +165,58 @@ const supplierRegister = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.supplierRegister = supplierRegister;
-const cusomerRegister = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, email, password, phone } = req.body;
-    if (!username || !email || !password || !phone) {
-        res.status(400).json({
-            message: "Please enter all fields",
-            status: 400,
-        });
-        return;
-    }
-    try {
-        const existingUser = yield prisma.user.findFirst({ where: { email } });
-        if (existingUser) {
-            res.status(403).json({
-                message: "User already exists",
-                status: 403,
-            });
-            return;
-        }
-        const hashpassword = yield bcrypt_1.default.hash(password, 10);
-        const user = yield prisma.user.create({
-            data: {
-                username,
-                email,
-                password: hashpassword,
-                phone: phone,
-                role: "CUSTOMER",
-                isActive: true
-            },
-        });
-        const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
-        res.status(200).json({
-            message: "Supplier created successfully",
-            token,
-            user,
-        });
-        return;
-    }
-    catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Internal server error",
-            status: 500,
-        });
-    }
-});
-exports.cusomerRegister = cusomerRegister;
+// export const cusomerRegister = async (req: Request, res: Response) => {
+//   const { username,email, password,phone } = req.body;
+//   if (!username || !email || !password || !phone) {
+//     res.status(400).json({
+//       message: "Please enter all fields",
+//       status: 400,
+//     });
+//     return;
+//   }
+//   try {
+//     const existingUser = await prisma.user.findFirst({ where: { email } });
+//     if (existingUser) {
+//       res.status(403).json({
+//         message: "User already exists",
+//         status: 403,
+//       });
+//       return;
+//     }
+//     const hashpassword = await bcrypt.hash(password, 10);
+//     const user = await prisma.user.create({
+//       data: {
+//         username,
+//         email,
+//         password: hashpassword,
+//         phone: phone,
+//         role: "CUSTOMER",
+//         isActive: true
+//       },
+//       select:{
+//         id:true,
+//         username:true,
+//         email:true,
+//         phone:true,
+//         role:true,
+//         isActive:true
+//       }
+//     });
+//     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
+//     res.status(200).json({
+//       message: "Supplier created successfully",
+//       token,
+//       user,
+//     });
+//     return;
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       message: "Internal server error",
+//       status: 500,
+//     });
+//   }
+// };
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {
@@ -218,7 +246,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const token = jsonwebtoken_1.default.sign({ id: existingUser.id, role: existingUser.role }, JWT_SECRECT, {
             expiresIn: "5h",
         });
-        res.status(200).json({
+        res.status(201).json({
             message: "User logged in successfully",
             token,
             status: 200,

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.markOrderAsDelivered = exports.qualityCheck = exports.reviewPriceProposal = exports.checkInventoryLevels = exports.lowstock = exports.getProducts = exports.getProductById = exports.addProducts = exports.deleteProduct = exports.updateProduct = exports.addProduct = exports.updateInventory = exports.addInventoryItem = exports.getInventoryItem = exports.listInventory = void 0;
 const client_1 = require("@prisma/client");
+const console_1 = require("console");
 const prisma = new client_1.PrismaClient();
 const listInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -121,19 +122,36 @@ const updateInventory = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.updateInventory = updateInventory;
 const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const { name, category, description, // Optional
-    price, stock, supplierId, SKU, // Optional
-    isPerishable = false, // Optional with a default value
-    seasonality, // Optional
-    shelfLife, // Optional
-     } = req.body;
-    // Validate required fields
-    if (!name || !category || !price || stock === undefined || !supplierId) {
-        res.status(400).json({ message: "Missing required fields" });
-        return;
-    }
     try {
-        // Check if the supplier exists
+        console.log("Incoming request body:", req.body); // Debugging
+        const { name, category, description, price, stock, supplierId, SKU, isPerishable = false, seasonality, shelfLife, imageUrls, // This should be an array of strings
+         } = req.body;
+        console.log(typeof imageUrls);
+        // Validate required fields
+        if (!name ||
+            !category ||
+            price === undefined ||
+            stock === undefined ||
+            !supplierId ||
+            !imageUrls ||
+            !Array.isArray(imageUrls)) {
+            res.status(400).json({ message: "Missing required fields or invalid imageUrls format" });
+            return;
+        }
+        // Debugging: Check field values
+        console.log("Validated request body:", {
+            name,
+            category,
+            price,
+            stock,
+            supplierId,
+            SKU,
+            isPerishable,
+            seasonality,
+            shelfLife,
+            imageUrls,
+        });
+        // Check if supplier exists
         const supplier = yield prisma.supplier.findUnique({
             where: { id: supplierId },
         });
@@ -141,15 +159,23 @@ const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             res.status(404).json({ message: "Supplier not found" });
             return;
         }
-        // Create the product (conditionally include optional fields)
+        // Create the product
         const product = yield prisma.product.create({
-            data: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ name,
+            data: {
+                name,
                 category,
                 price,
                 stock,
-                supplierId }, (description && { description })), (SKU && { SKU })), { // Add if provided
-                isPerishable }), (seasonality && { seasonality })), (shelfLife !== undefined && { shelfLife })),
+                supplierId,
+                description,
+                SKU,
+                isPerishable,
+                seasonality,
+                shelfLife,
+                imageUrls,
+            },
         });
+        console.log("Product created:", product);
         res.status(201).json({
             message: "Product added successfully",
             product,
@@ -157,14 +183,14 @@ const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return;
     }
     catch (err) {
-        console.error(err);
-        // Handle unique constraint errors (e.g., SKU uniqueness)
+        console.error("Error in addProduct:", err);
         if (err instanceof client_1.Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
             res.status(409).json({
-                message: `A product with the same ${(_b = (_a = err.meta) === null || _a === void 0 ? void 0 : _a.target) !== null && _b !== void 0 ? _b : 'unknown'} already exists`,
+                message: `A product with the same ${(_b = (_a = err.meta) === null || _a === void 0 ? void 0 : _a.target) !== null && _b !== void 0 ? _b : "unknown"} already exists`,
             });
+            return;
         }
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Internal Server Error", error: console_1.error });
         return;
     }
 });
@@ -259,7 +285,8 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 category: true,
                 description: true,
                 price: true,
-                stock: true
+                stock: true,
+                imageUrls: true
             }
         });
         res.status(200).json({ message: "Products found", getProducts });
@@ -333,7 +360,7 @@ const checkInventoryLevels = (req, res) => __awaiter(void 0, void 0, void 0, fun
             },
         });
         const reorderRequests = inventoryItems.map((item) => {
-            const demandClassification = item.product.isDemand;
+            const demandClassification = item.isDemand || 'LOW'; // Default to 'LOW' if demandType does not exist
             const reorderQuantity = demandClassification
                 ? calculateReorderQuantity(item, demandClassification)
                 : 0;

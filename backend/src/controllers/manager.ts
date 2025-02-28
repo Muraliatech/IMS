@@ -7,7 +7,8 @@ import { body } from 'express-validator';
 import { products } from './customer';
 import { threadId } from "worker_threads";
 import { processPayment } from './cashier';
-
+import { error } from "console";
+ 
 const prisma = new PrismaClient();
 export const listInventory = async (req: Request, res: Response) => {
 
@@ -135,28 +136,56 @@ export const updateInventory = async (req: Request, res: Response) => {
 };
 
      
+ 
 export const addProduct = async (req: Request, res: Response) => {
-  const {
-    name,
-    category,
-    description, // Optional
-    price,
-    stock,
-    supplierId,
-    SKU, // Optional
-    isPerishable = false, // Optional with a default value
-    seasonality, // Optional
-    shelfLife, // Optional
-  } = req.body;
-
-  // Validate required fields
-  if (!name || !category || !price || stock === undefined || !supplierId) {
-     res.status(400).json({ message: "Missing required fields" });
-     return
-  }
-
   try {
-    // Check if the supplier exists
+    console.log("Incoming request body:", req.body); // Debugging
+  
+    const {
+      name,
+      category,
+      description,
+      price,
+      stock,
+      supplierId,
+      SKU,
+      isPerishable = false,
+      seasonality,
+      shelfLife,
+      imageUrls, // This should be an array of strings
+    } = req.body;
+    console.log(typeof imageUrls)
+    // Validate required fields
+    if (
+      !name ||
+      !category ||
+      price === undefined ||
+      stock === undefined ||
+      !supplierId ||
+      !imageUrls ||
+      !Array.isArray(imageUrls)
+    ) {
+       res.status(400).json({ message: "Missing required fields or invalid imageUrls format" });
+       return
+    }
+
+    
+
+    // Debugging: Check field values
+    console.log("Validated request body:", {
+      name,
+      category,
+      price,
+      stock,
+      supplierId,
+      SKU,
+      isPerishable,
+      seasonality,
+      shelfLife,
+      imageUrls,
+    });
+
+    // Check if supplier exists
     const supplier = await prisma.supplier.findUnique({
       where: { id: supplierId },
     });
@@ -166,7 +195,7 @@ export const addProduct = async (req: Request, res: Response) => {
        return
     }
 
-    // Create the product (conditionally include optional fields)
+    // Create the product
     const product = await prisma.product.create({
       data: {
         name,
@@ -174,33 +203,38 @@ export const addProduct = async (req: Request, res: Response) => {
         price,
         stock,
         supplierId,
-        ...(description && { description }), // Add if provided
-        ...(SKU && { SKU }), // Add if provided
+        description,
+        SKU,
         isPerishable,
-        ...(seasonality && { seasonality }), // Add if provided
-        ...(shelfLife !== undefined && { shelfLife }), // Add if provided
+        seasonality,
+        shelfLife,
+        imageUrls, 
       },
     });
+
+    console.log("Product created:", product);
 
      res.status(201).json({
       message: "Product added successfully",
       product,
     });
     return
-  } catch (err) {
-    console.error(err);
 
-    // Handle unique constraint errors (e.g., SKU uniqueness)
+  } catch (err) {
+    console.error("Error in addProduct:", err);
+
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
        res.status(409).json({
-        message: `A product with the same ${err.meta?.target ?? 'unknown'} already exists`,
+        message: `A product with the same ${err.meta?.target ?? "unknown"} already exists`,
       });
+      return
     }
 
-     res.status(500).json({ message: "Internal Server Error" });
+     res.status(500).json({ message: "Internal Server Error", error:error });
      return
   }
 };
+
 
 
 export const updateProduct = async (req: Request, res: Response) => {
@@ -296,7 +330,8 @@ export const getProducts = async (req: Request, res: Response) => {
                 category: true,
                 description: true,
                 price: true,
-                stock: true
+                stock: true,
+                imageUrls:true
             }
         })
         res.status(200).json({ message: "Products found", getProducts })
@@ -382,12 +417,13 @@ export const lowstock = async (req: Request, res: Response) => {
        include: {
          product: {
            include: { supplier: true },
+
          },
        },
      });
  
      const reorderRequests = inventoryItems.map((item) => {
-       const demandClassification = item.product.isDemand;
+       const demandClassification = item.isDemand || 'LOW'; // Default to 'LOW' if demandType does not exist
        const reorderQuantity = demandClassification
          ? calculateReorderQuantity(item, demandClassification)
          : 0;

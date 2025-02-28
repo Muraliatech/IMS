@@ -11,8 +11,15 @@ const cashier_1 = require("../controllers/cashier");
 const router = (0, express_1.Router)();
 router.get("/products", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.products);
 router.post("/order", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.order);
+router.post("/process-payment", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.processPayment);
 router.post("/generatereceipt", SyncInventoryandProduct_1.default, (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.generateReceipt);
 router.get("/transaction", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.transaction);
 router.get("/product-availability/:productId", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.productAvilability);
 router.post("/cancelorder", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.cancelOrder);
+router.get("/getOrders", (0, auth_1.checkAuth)(["CASHIER"]), cashier_1.getCustomerOrders);
+//stock alerts
+//invoice
+//carts
+//order history
+//order status
 exports.default = router;

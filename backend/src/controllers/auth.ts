@@ -32,9 +32,18 @@ export const register = async (req: Request, res: Response) => {
         isActive: true
 
       },
+      select:{
+        id:true,
+        username:true,
+        email:true,
+        phone:true,
+        role:true,
+        isActive:true
+
+      }
     });
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
-    res.status(200).json({
+    res.status(201).json({
       message: "User created successfully",
       token,
       user
@@ -77,7 +86,17 @@ export const adminregister = async (req: Request, res: Response) => {
         role: 'ADMIN'
 
       },
+      select:{
+        id:true,
+        username:true,
+        email:true,
+        phone:true,
+        role:true,
+        isActive:true
+
+      }
     });
+
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
     res.status(200).json({
       message: "ADMIN created successfully",
@@ -130,6 +149,12 @@ export const supplierRegister = async (req: Request, res: Response) => {
         location,
         role,
       },
+      select:{
+        id:true,
+        email:true,
+        contact:true,
+        role:true, 
+      }
     });
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
@@ -150,56 +175,65 @@ export const supplierRegister = async (req: Request, res: Response) => {
 };
 
 
-export const cusomerRegister = async (req: Request, res: Response) => {
-  const { username,email, password,phone } = req.body;
+// export const cusomerRegister = async (req: Request, res: Response) => {
+//   const { username,email, password,phone } = req.body;
   
-  if (!username || !email || !password || !phone) {
-    res.status(400).json({
-      message: "Please enter all fields",
-      status: 400,
-    });
-    return;
-  }
+//   if (!username || !email || !password || !phone) {
+//     res.status(400).json({
+//       message: "Please enter all fields",
+//       status: 400,
+//     });
+//     return;
+//   }
 
-  try {
-    const existingUser = await prisma.user.findFirst({ where: { email } });
+//   try {
+//     const existingUser = await prisma.user.findFirst({ where: { email } });
 
-    if (existingUser) {
-      res.status(403).json({
-        message: "User already exists",
-        status: 403,
-      });
-      return;
-    }
+//     if (existingUser) {
+//       res.status(403).json({
+//         message: "User already exists",
+//         status: 403,
+//       });
+//       return;
+//     }
 
-    const hashpassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashpassword,
-        phone: phone,
-        role: "CUSTOMER",
-        isActive: true
-      },
-    });
+//     const hashpassword = await bcrypt.hash(password, 10);
+//     const user = await prisma.user.create({
+//       data: {
+//         username,
+//         email,
+//         password: hashpassword,
+//         phone: phone,
+//         role: "CUSTOMER",
+//         isActive: true
+//       },
+//       select:{
+//         id:true,
+//         username:true,
+//         email:true,
+//         phone:true,
+//         role:true,
+//         isActive:true
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
+//       }
+//     });
 
-    res.status(200).json({
-      message: "Supplier created successfully",
-      token,
-      user,
-    });
-    return;
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Internal server error",
-      status: 500,
-    });
-  }
-};
+//     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
+
+//     res.status(200).json({
+//       message: "Supplier created successfully",
+//       token,
+//       user,
+//     });
+//     return;
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       message: "Internal server error",
+//       status: 500,
+//     });
+//   }
+// };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
@@ -236,7 +270,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       expiresIn: "5h",
     });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "User logged in successfully",
       token,
       status: 200,

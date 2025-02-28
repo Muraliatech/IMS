@@ -17,11 +17,11 @@ export const Signup = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post("http://localhost:3002/api/v1/customer/signup", {
-        name,
+      const response = await axios.post("http://localhost:5000/api/auth/register", {
+        username:name,
         email,
         password,
-        phonenumber: mobile,
+        contact: mobile,
       });
 
       if (response.status !== 201) {
@@ -29,8 +29,10 @@ export const Signup = () => {
       } else {
         setSuccess(response.data.message);
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.data));
-        navigate("/onlineShop");
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        const user = response.data.user
+        navigate("/"+`${user.role.toLowerCase()}`+"Dashboard")
+
       }
     } catch (err) {
       const errorMessage = axios.isAxiosError(err) && err.response?.data?.message 

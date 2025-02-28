@@ -9,7 +9,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
 const helmet_1 = __importDefault(require("helmet"));
-const client_1 = require("@prisma/client");
 // Import Routes
 const admin_1 = __importDefault(require("./routes/admin"));
 const manager_1 = __importDefault(require("./routes/manager"));
@@ -20,8 +19,6 @@ const cashier_1 = __importDefault(require("./routes/cashier"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 // Initialize environment variables
 dotenv_1.default.config();
-// Initialize Prisma Client
-const prisma = new client_1.PrismaClient();
 // Create Express app
 const app = (0, express_1.default)();
 // Middleware

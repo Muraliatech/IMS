@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cancelOrder = exports.productAvilability = exports.generateReceipt = exports.transaction = exports.processPayment = exports.order = exports.products = void 0;
+exports.getCustomerOrders = exports.cancelOrder = exports.productAvilability = exports.generateReceipt = exports.transaction = exports.processPayment = exports.order = exports.products = void 0;
 require("dotenv").config();
 const client_1 = require("@prisma/client");
 const crypto_1 = __importDefault(require("crypto"));
@@ -44,21 +44,17 @@ const products = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.products = products;
 // Initialize Razorpay client with your API keys
 const razorpay = new razorpay_1.default({
-    key_id: 'rzp_test_J10jLLPLBcqXlJ', // Your Razorpay Key ID
-    key_secret: 'l5aaBv9Dg20sYxTAv5B0UAQD' // Your Razorpay Key Secret
+    key_id: 'rzp_test_eieHlTMTtnQ3n3', // Your Razorpay Key ID
+    key_secret: 'HQqAP8TFRMV5ub7YKmQ2zxxG' // Your Razorpay Key Secret
 });
 // Controller to create an order
 const order = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(KEY_SECRET);
     const { customerId, products } = req.body;
-    if (!customerId || !products || !Array.isArray(products)) {
-        res.status(400).json({ message: "Invalid request. Please provide customerId and products." });
-        return;
-    }
     try {
         let totalAmount = 0;
         const orderProducts = [];
-        const productIds = products.map((p) => p.productId);
+        const productIds = products.map((p) => p.productId).filter((id) => id !== undefined);
+        console.log("Filtered productIds:", productIds);
         const fetchedProducts = yield prisma.product.findMany({
             where: { id: { in: productIds } },
         });
@@ -81,7 +77,6 @@ const order = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 price: product.price,
             });
         }
-        // Ensure totalAmount is rounded to 2 decimal places
         totalAmount = parseFloat(totalAmount.toFixed(2));
         const razorpayOrder = yield razorpay.orders.create({
             amount: Math.round(totalAmount * 100),
@@ -115,18 +110,17 @@ const order = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             razorpay_order_id: razorpayOrder.id,
             amount: totalAmount,
         });
-        return;
     }
     catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error", error: error.message });
-        return;
     }
 });
 exports.order = order;
 const processPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, } = req.body;
+        console.log(req.body);
         // Comprehensive input validation
         if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
             res.status(400).json({ message: "Missing payment details" });
@@ -175,16 +169,58 @@ const processPayment = (req, res) => __awaiter(void 0, void 0, void 0, function*
             },
         });
         // Batch inventory and transaction updates
+        // const transactionPromises = order.products.map(async (product) => {
+        //     const productDetails = await prisma.product.findUnique({
+        //         where: { id: product.productId }
+        //     });
+        //     if (!productDetails) {
+        //         throw new Error(`Product with ID ${product.productId} not found`);
+        //     }
+        //     // Parallel transaction and inventory updates
+        //     Promise.all([
+        //         prisma.transaction.create({
+        //             data: {
+        //                 productId: product.productId,
+        //                 quantity: product.quantity,
+        //                 total: product.quantity * productDetails.price,
+        //                 cashierId: req.user?.id,
+        //                 transactionType: TransactionType.SALE,
+        //             },
+        //         }),
+        //         prisma.inventory.update({
+        //             where: { id:inventory.id },
+        //             data: { quantity: { decrement: product.quantity } },
+        //         })
+        //     ]);
+        // });
         const transactionPromises = order.products.map((product) => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
             const productDetails = yield prisma.product.findUnique({
-                where: { id: product.productId }
+                where: { id: product.productId },
             });
             if (!productDetails) {
                 throw new Error(`Product with ID ${product.productId} not found`);
             }
+            // Now, check the inventory for the same productId, not just the productId
+            const inventory = yield prisma.inventory.findFirst({
+                where: {
+                    productId: product.productId // Find inventory by productId
+                },
+                select: {
+                    id: true, // Include the ID of the inventory record
+                    productId: true, // Include the productId (for validation or reference)
+                    quantity: true, // You can add other fields if needed
+                    price: true
+                }
+            });
+            if (!inventory) {
+                throw new Error(`Inventory record not found for Product ID ${product.productId}`);
+            }
+            if (!inventory) {
+                throw new Error(`Inventory record not found for Product ID ${product.productId}`);
+            }
             // Parallel transaction and inventory updates
-            Promise.all([
+            yield Promise.all([
                 prisma.transaction.create({
                     data: {
                         productId: product.productId,
@@ -195,11 +231,12 @@ const processPayment = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     },
                 }),
                 prisma.inventory.update({
-                    where: { id: product.productId },
+                    where: { id: inventory.id }, // Now using the inventory id instead of productId
                     data: { quantity: { decrement: product.quantity } },
-                })
+                }),
             ]);
         }));
+        yield Promise.all(transactionPromises);
         // Wait for all updates to complete
         yield Promise.all(transactionPromises);
         res.status(200).json({
@@ -339,17 +376,17 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             where: { id: orderId },
             include: { products: true }
         });
-        // if(!order || order.status === "COMPLETED" || order.status === "CANCELLED"){
-        //     res.status(404).json({message:"Order not found"})
-        //     return;
-        // }
+        if (!order || order.status === "CANCELLED") {
+            res.status(409).json({ message: "Order already Cancelled" });
+            return;
+        }
         const updatedOrder = yield prisma.order.update({
             where: { id: orderId },
             data: {
                 status: client_1.OrderStatus_new.CANCELLED
             }
         });
-        res.status(201).json({
+        res.status(204).json({
             message: "Order cancelled successfully",
             order: updatedOrder
         });
@@ -360,3 +397,54 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.cancelOrder = cancelOrder;
+const getCustomerOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const orders = yield prisma.order.findMany({
+            where: {
+                orderType: client_1.OrderType.CUSTOMER,
+                status: client_1.OrderStatus_new.PENDING
+            },
+            select: {
+                id: true,
+                totalAmount: true,
+                paymentStatus: true,
+                customerId: true,
+                products: {
+                    select: {
+                        quantity: true,
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                stock: true,
+                                category: true,
+                                description: true,
+                                SKU: true,
+                                seasonality: true,
+                                shelfLife: true,
+                                imageUrls: true,
+                            }
+                        },
+                    }
+                },
+                customer: {
+                    select: {
+                        username: true,
+                        email: true
+                    }
+                }
+            }
+        });
+        if (!orders.length) {
+            res.status(404).json({ message: "No orders found" });
+            return;
+        }
+        res.status(200).json({ message: "Orders retrieved", orders });
+    }
+    catch (err) {
+        console.error("Error fetching orders:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+exports.getCustomerOrders = getCustomerOrders;

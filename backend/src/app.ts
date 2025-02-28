@@ -15,14 +15,16 @@ import customerRoutes from "./routes/customer";
 import cashierRoutes from "./routes/cashier";
 import authRoutes from "./routes/authRoutes";
 
+ 
+ 
 // Initialize environment variables
 dotenv.config();
-
-// Initialize Prisma Client
-const prisma = new PrismaClient();
-
+ 
 // Create Express app
 const app = express();
+
+
+
 
 // Middleware
 app.use(express.json());

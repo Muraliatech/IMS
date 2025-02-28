@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login, forgotPassword, logout, adminregister, adminLogin, supplierRegister ,loginSupplier, updateProfile,cusomerRegister} from "../controllers/auth";//forgotPassword, resetPassword, logout, verifyToken, refreshToken
+import { register, login, forgotPassword, logout, adminregister, adminLogin, supplierRegister ,loginSupplier, updateProfile} from "../controllers/auth";//forgotPassword, resetPassword, logout, verifyToken, refreshToken
 import { validationRegister, validationLogin,validateCustomer, checkBlacklist, checkAuth } from '../middleware/auth';
 import { profile } from "console";
 

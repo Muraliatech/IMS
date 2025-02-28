@@ -1,13 +1,14 @@
 require("dotenv").config()
-import { OrderStatus_new, OrderType, PaymentStatus, PrismaClient, TransactionType,  } from '@prisma/client';
+import { OrderStatus_new, OrderType, PaymentStatus, PrismaClient, TransactionType, } from '@prisma/client';
 import { Request, Response, NextFunction } from "express"
 import crypto from "crypto";
 import Razorpay from 'razorpay';
-const {KEY_SECRET} = process.env;
- 
+const { KEY_SECRET } = process.env;
+
 import PDFDocument from "pdfkit";
 import bwipjs from "bwip-js"; // For generating barcodes
- 
+import { CANCELLED } from 'dns';
+
 
 if (!KEY_SECRET) {
     throw new Error("KEY_SECRET is not defined in environment variables");
@@ -32,119 +33,110 @@ export const products = async (req: Request, res: Response) => {
     }
 }
 
- 
- 
+
+
 // Initialize Razorpay client with your API keys
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_J10jLLPLBcqXlJ', // Your Razorpay Key ID
-  key_secret: 'l5aaBv9Dg20sYxTAv5B0UAQD' // Your Razorpay Key Secret
+    key_id: 'rzp_test_eieHlTMTtnQ3n3', // Your Razorpay Key ID
+    key_secret: 'HQqAP8TFRMV5ub7YKmQ2zxxG' // Your Razorpay Key Secret
 });
 
 // Controller to create an order
 export const order = async (req: Request, res: Response) => {
-    console.log(KEY_SECRET)
-    const { customerId, products } = req.body;
-     
-    
-    if (!customerId || !products || !Array.isArray(products)) {
-       res.status(400).json({ message: "Invalid request. Please provide customerId and products." });
-       return
-    }
-  
+    const { customerId, products }: { customerId: string; products: { productId: string; quantity: number }[] } = req.body;
+
     try {
-      let totalAmount = 0;
-      const orderProducts = [];
-      const productIds = products.map((p) => p.productId);
-  
-      const fetchedProducts = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-      });
-  
-      const productMap = new Map(fetchedProducts.map((p) => [p.id, p]));
-  
-      for (const { productId, quantity } of products) {
-        const product = productMap.get(productId);
-  
-        if (!product) {
-           res.status(400).json({ message: `Product with ID ${productId} not found` });
-           return
-        }
-  
-        if (product.stock < quantity) {
-           res.status(400).json({ message: `Insufficient stock for product ${product.name}` });
-           return
-        }
-  
-        const productTotal = product.price * quantity;
-        totalAmount += productTotal;
-  
-        orderProducts.push({
-          productId: product.id,
-          quantity,
-          price: product.price,
+        let totalAmount = 0;
+        const orderProducts = [];
+        const productIds = products.map((p) => p.productId).filter((id) => id !== undefined);
+        console.log("Filtered productIds:", productIds);
+        
+        const fetchedProducts = await prisma.product.findMany({
+            where: { id: { in: productIds } },
         });
-      }
-  
-      // Ensure totalAmount is rounded to 2 decimal places
-      totalAmount = parseFloat(totalAmount.toFixed(2));
-  
-      const razorpayOrder = await razorpay.orders.create({ 
-        amount: Math.round(totalAmount * 100), 
-        currency: 'INR', 
-        receipt: `order_receipt_${Date.now()}`, 
-        payment_capture: true, 
-      });
-  
-      const newOrder = await prisma.order.create({
-        data: {
-          customerId,
-          status: OrderStatus_new.PENDING,
-          totalAmount,
-          paymentStatus: PaymentStatus.PENDING,
-          orderType: OrderType.CUSTOMER,
-          razorpayOrderId: razorpayOrder.id,
-          products: {
-            create: orderProducts.map((orderProduct) => ({
-              productId: orderProduct.productId,
-              quantity: orderProduct.quantity,
-              requestedPrice: orderProduct.price,
-            })),
-          },
-        },
-        include: {
-          products: true,
-        },
-      });
-  
-       res.status(201).json({
-        message: "Order created successfully",
-        order: newOrder,
-        razorpay_order_id: razorpayOrder.id,
-        amount: totalAmount,
-      });
-      return
-  
+        
+        const productMap = new Map(fetchedProducts.map((p) => [p.id, p]));
+
+        for (const { productId, quantity } of products) {
+            const product = productMap.get(productId);
+
+            if (!product) {
+                res.status(400).json({ message: `Product with ID ${productId} not found` });
+                return;
+            }
+
+            if (product.stock < quantity) {
+                res.status(400).json({ message: `Insufficient stock for product ${product.name}` });
+                return;
+            }
+
+            const productTotal = product.price * quantity;
+            totalAmount += productTotal;
+
+            orderProducts.push({
+                productId: product.id,
+                quantity,
+                price: product.price,
+            });
+        }
+
+        totalAmount = parseFloat(totalAmount.toFixed(2));
+
+        const razorpayOrder = await razorpay.orders.create({
+            amount: Math.round(totalAmount * 100),
+            currency: 'INR',
+            receipt: `order_receipt_${Date.now()}`,
+            payment_capture: true,
+        });
+
+        const newOrder = await prisma.order.create({
+            data: {
+                customerId,
+                status: OrderStatus_new.PENDING,
+                totalAmount,
+                paymentStatus: PaymentStatus.PENDING,
+                orderType: OrderType.CUSTOMER,
+                razorpayOrderId: razorpayOrder.id,
+                products: {
+                    create: orderProducts.map((orderProduct) => ({
+                        productId: orderProduct.productId,
+                        quantity: orderProduct.quantity,
+                        requestedPrice: orderProduct.price,
+                    })),
+                },
+            },
+            include: {
+                products: true,
+            },
+        });
+
+        res.status(201).json({
+            message: "Order created successfully",
+            order: newOrder,
+            razorpay_order_id: razorpayOrder.id,
+            amount: totalAmount,
+        });
     } catch (error) {
-      console.error(error);
-       res.status(500).json({ message: "Internal server error", error: (error as Error).message });
-       return
+        console.error(error);
+        res.status(500).json({ message: "Internal server error", error: (error as Error).message });
     }
-  };
+};
 
 
 
-  export const processPayment = async (req: Request, res: Response) => {
+
+export const processPayment = async (req: Request, res: Response) => {
     try {
         const {
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature,
         } = req.body;
-
+            console.log(req.body)
         // Comprehensive input validation
         if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
-             res.status(400).json({ message: "Missing payment details" });
-             return
+            res.status(400).json({ message: "Missing payment details" });
+            return
         }
 
         // Signature validation
@@ -154,8 +146,8 @@ export const order = async (req: Request, res: Response) => {
             .digest("hex");
 
         if (generatedSignature !== razorpay_signature) {
-             res.status(400).json({ message: "Invalid payment signature" });
-             return
+            res.status(400).json({ message: "Invalid payment signature" });
+            return
         }
 
         // Find order using either razorpayOrderId or by matching other conditions
@@ -173,18 +165,18 @@ export const order = async (req: Request, res: Response) => {
         });
 
         if (!order) {
-             res.status(404).json({ message: "Order not found" });
-             return
+            res.status(404).json({ message: "Order not found" });
+            return
         }
 
         if (order.paymentStatus === PaymentStatus.PAID) {
-             res.status(400).json({ message: "Payment already processed" });
-             return
+            res.status(400).json({ message: "Payment already processed" });
+            return
         }
 
         // Update order with fallback on ID
         const updatedOrder = await prisma.order.update({
-            where: { 
+            where: {
                 id: order.id  // Use the found order's ID
             },
             data: {
@@ -196,17 +188,65 @@ export const order = async (req: Request, res: Response) => {
         });
 
         // Batch inventory and transaction updates
-        const transactionPromises = order.products.map(async (product) => {
-            const productDetails = await prisma.product.findUnique({ 
-                where: { id: product.productId } 
-            });
+        // const transactionPromises = order.products.map(async (product) => {
+        //     const productDetails = await prisma.product.findUnique({
+        //         where: { id: product.productId }
+        //     });
 
+        //     if (!productDetails) {
+        //         throw new Error(`Product with ID ${product.productId} not found`);
+        //     }
+
+        //     // Parallel transaction and inventory updates
+        //     Promise.all([
+        //         prisma.transaction.create({
+        //             data: {
+        //                 productId: product.productId,
+        //                 quantity: product.quantity,
+        //                 total: product.quantity * productDetails.price,
+        //                 cashierId: req.user?.id,
+        //                 transactionType: TransactionType.SALE,
+        //             },
+        //         }),
+        //         prisma.inventory.update({
+        //             where: { id:inventory.id },
+        //             data: { quantity: { decrement: product.quantity } },
+        //         })
+
+        //     ]);
+        // });
+        const transactionPromises = order.products.map(async (product) => {
+            const productDetails = await prisma.product.findUnique({
+                where: { id: product.productId },
+            });
+        
             if (!productDetails) {
                 throw new Error(`Product with ID ${product.productId} not found`);
             }
-
+        
+            // Now, check the inventory for the same productId, not just the productId
+            const inventory = await prisma.inventory.findFirst({
+                where: {
+                    productId: product.productId  // Find inventory by productId
+                },
+                select: {
+                    id: true,               // Include the ID of the inventory record
+                    productId: true,        // Include the productId (for validation or reference)
+                    quantity: true,         // You can add other fields if needed
+                    price: true
+                }
+            });
+            
+            if (!inventory) {
+                throw new Error(`Inventory record not found for Product ID ${product.productId}`);
+            }
+            
+            if (!inventory) {
+                throw new Error(`Inventory record not found for Product ID ${product.productId}`);
+            }
+        
             // Parallel transaction and inventory updates
-             Promise.all([
+            await Promise.all([
                 prisma.transaction.create({
                     data: {
                         productId: product.productId,
@@ -217,30 +257,32 @@ export const order = async (req: Request, res: Response) => {
                     },
                 }),
                 prisma.inventory.update({
-                    where: { id: product.productId },
+                    where: { id: inventory.id },  // Now using the inventory id instead of productId
                     data: { quantity: { decrement: product.quantity } },
-                })
-                
+                }),
             ]);
         });
         
+        await Promise.all(transactionPromises);
+        
+
 
         // Wait for all updates to complete
         await Promise.all(transactionPromises);
 
-         res.status(200).json({
+        res.status(200).json({
             message: "Payment processed successfully",
             order: updatedOrder
         });
         return
-       
+
 
     } catch (error) {
         console.error("Payment Processing Error:", error);
-         res.status(500).json({ 
-            message: "Internal server error", 
+        res.status(500).json({
+            message: "Internal server error",
             error: error instanceof Error ? error.message : 'Unknown error'
-            
+
         });
         return
     }
@@ -248,18 +290,18 @@ export const order = async (req: Request, res: Response) => {
 
 
 
-export const transaction  =async(req:Request,res:Response)=>{
-    try{
-        const transactions =await  prisma.transaction.findMany();
-        if(!transactions){
-            res.status(404).json({message:"No transactions found"})
+export const transaction = async (req: Request, res: Response) => {
+    try {
+        const transactions = await prisma.transaction.findMany();
+        if (!transactions) {
+            res.status(404).json({ message: "No transactions found" })
             return;
         }
         res.status(200).json(transactions);
 
-    }catch(err){
+    } catch (err) {
         console.log(err);
-        res.status(500).json({message:"Internal Server Error"})
+        res.status(500).json({ message: "Internal Server Error" })
     }
 }
 
@@ -364,49 +406,105 @@ export const generateReceipt = async (req: Request, res: Response) => {
 
 
 
-export const productAvilability = async(req:Request,res:Response)=>{
-    const {productId} = req.body;
-    try{
+export const productAvilability = async (req: Request, res: Response) => {
+    const { productId } = req.body;
+    try {
         const product = await prisma.product.findUnique({
-            where:{id:productId}
+            where: { id: productId }
         })
-        if(!product){
-            res.status(404).json({message:"Product not found"})
+        if (!product) {
+            res.status(404).json({ message: "Product not found" })
             return;
         }
-        res.status(200).json({message:"Product found", stock: product.stock})
+        res.status(200).json({ message: "Product found", stock: product.stock })
     }
-    catch(err){
+    catch (err) {
         console.log(err);
-        res.status(500).json({message:"Internal Server Error"})
-}
+        res.status(500).json({ message: "Internal Server Error" })
+    }
 }
 
-export const cancelOrder = async(req:Request,res:Response)=>{
-    const {orderId} = req.body;
+export const cancelOrder = async (req: Request, res: Response) => {
+    const { orderId } = req.body;
     console.log(orderId)
-    try{
+    try {
         const order = await prisma.order.findUnique({
-            where:{id:orderId},
-            include:{ products: true }
+            where: { id: orderId },
+            include: { products: true }
         })
-        // if(!order || order.status === "COMPLETED" || order.status === "CANCELLED"){
-        //     res.status(404).json({message:"Order not found"})
-        //     return;
-        // }
+        if(!order || order.status === "CANCELLED"){
+            res.status(409).json({message:"Order already Cancelled"})
+            return;
+        }
+
+         
         const updatedOrder = await prisma.order.update({
-            where:{id:orderId},
-            data:{
-                status:OrderStatus_new.CANCELLED
+            where: { id: orderId },
+            data: {
+                status: OrderStatus_new.CANCELLED
             }
         })
-        res.status(201).json({
-            message:"Order cancelled successfully",
-            order:updatedOrder
+        res.status(204).json({
+            message: "Order cancelled successfully",
+            order: updatedOrder
         })
     }
-    catch(err){
+    catch (err) {
         console.log(err);
-        res.status(500).json({message:"Internal Server Error"})
+        res.status(500).json({ message: "Internal Server Error" })
     }
 }
+
+
+export const getCustomerOrders = async (req: Request, res: Response) => {
+    try {
+        const orders = await prisma.order.findMany({
+            where: {
+                orderType: OrderType.CUSTOMER,
+                status:OrderStatus_new.PENDING
+            },
+            select: {
+                id: true,
+                totalAmount: true,
+                paymentStatus:true,
+                customerId: true,
+                products: {
+                    select: {
+                        quantity:true,
+                        product: {
+                            select: {
+                                id:true,
+                                name: true,
+                                price: true,
+                                stock: true,
+                                category: true,
+                                description: true,
+                                SKU: true,
+                                seasonality: true,
+                                shelfLife: true,
+                                imageUrls: true,
+                            }
+                        },
+                    }
+                },
+                
+                customer: {  // Optional: Fetch customer details
+                    select: {
+                        username: true,
+                        email: true
+                    }
+                }
+            }
+        });
+
+        if (!orders.length) {
+            res.status(404).json({ message: "No orders found" });
+            return
+        }
+
+        res.status(200).json({ message: "Orders retrieved", orders });
+    } catch (err) {
+        console.error("Error fetching orders:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};

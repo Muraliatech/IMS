@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card } from "../Card";
 //import { Link } from "react-router-dom";
-
+import { motion } from "framer-motion";
 export const LandingPage = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -152,7 +152,7 @@ export const LandingPage = () => {
             ))}
           </div>
 
-          <div className="flex flex-col justify-center cursor-pointer">
+          <div className="flex flex-col justify-center cursor-pointer hover:opacity-80">
             <div>Pricing</div>
           </div>
         </ul>
@@ -161,7 +161,9 @@ export const LandingPage = () => {
         <a onClick={handleSign} className="hover:opacity-80 cursor-pointer">
             Sign in →
           </a>
-          <button className="px-5 py-2 bg-[#3B82F6] text-white font-semibold rounded-full shadow-md hover:opacity-80 cursor-pointer">
+          <button onClick={()=>{
+            window.location.href = "/signup"
+          }} className="px-5 py-2 bg-[#3B82F6] text-white font-semibold rounded-full shadow-md hover:opacity-80 cursor-pointer">
             Contact sales →
           </button>
         </div>
@@ -172,16 +174,21 @@ export const LandingPage = () => {
           <span className="px-3 py-1 bg-[#F8FAFC] text-[#1A365D] rounded-full text-sm">
             Preview
           </span>
-          <h1 className="text-6xl font-bold leading-tight mt-4">
+         <div className="cursor-pointer">
+            <motion.div whileHover={{scale:1.1}}>
+            <h1 className="text-6xl font-bold leading-tight mt-4">
             Your Global Commerce <br />
             <span className="text-[#F8FAFC]">Partner, Engineered</span> <br />
             for Peak <br />
             <span className="text-[#3B82F6]">Performance</span>
           </h1>
+            </motion.div>
           <p className="mt-4 text-lg text-[#F8FAFC]">
-            Join the millions of companies of all sizes that use Primemart to
-            accept payments online and in person.
+          Join millions of companies using Primemart to accept 
+          payments online and in person, and streamline inventory 
+          management with our advanced solution.
           </p>
+         </div>
           <button className="mt-6 px-6 py-3 bg-[#3B82F6] text-white font-semibold rounded-full shadow-md hover:bg-[#2563EB] cursor-pointer">
             Request an invite →
           </button>
