@@ -149,7 +149,7 @@ const supplierRegister = (req, res) => __awaiter(void 0, void 0, void 0, functio
             }
         });
         const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
-        res.status(200).json({
+        res.status(201).json({
             message: "Supplier created successfully",
             token,
             user,
@@ -311,6 +311,7 @@ const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.adminLogin = adminLogin;
 const loginSupplier = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, role } = req.body;
+    console.log(req.body);
     try {
         if (!email || !password) {
             res.status(400).json({
@@ -338,7 +339,7 @@ const loginSupplier = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const token = jsonwebtoken_1.default.sign({ id: existingUser.id, role: existingUser.role }, JWT_SECRECT, {
             expiresIn: "5h",
         });
-        res.status(200).json({
+        res.status(201).json({
             message: "User logged in successfully",
             token,
             status: 200,

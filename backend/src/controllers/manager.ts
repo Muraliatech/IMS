@@ -342,8 +342,7 @@ export const getProducts = async (req: Request, res: Response) => {
     }
 }
 
-
-// Get all low stock items
+ 
 export const lowstock = async (req: Request, res: Response) => {
     try {
 
@@ -352,7 +351,7 @@ export const lowstock = async (req: Request, res: Response) => {
             SELECT * FROM "Inventory" 
             WHERE quantity <= threshold
         `;
-
+  console.log(lowStockItems)
 
         if (lowStockItems.length === 0) {
             res.status(404).json({
@@ -370,11 +369,6 @@ export const lowstock = async (req: Request, res: Response) => {
             threshold: item.threshold,
             reorderLevel: item.reorderLevel,
             needsReorder: item.quantity <= item.reorderLevel,
-            product: {
-                id: item.product.id,
-                name: item.product.name,
-                SKU: item.product.SKU
-            },
             supplier: item.supplier,
             lastUpdated: item.updatedAt
         }));

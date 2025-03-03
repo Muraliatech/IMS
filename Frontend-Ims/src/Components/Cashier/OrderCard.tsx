@@ -344,7 +344,7 @@ import { ProcessPayment } from "./ProcessPayment";
 import axios from "axios";
 import { BACKEND_URL } from "../../../Config";
 import { Order } from "./CashierDashboard";
-import { Receipt, Package, User } from "lucide-react";
+import { Receipt, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
  
 interface OrderCardProps {

@@ -2,28 +2,31 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const Signup = () => {
+export const SupplierRegister = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [location, setLocation] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleSignin = () => {
-    navigate("/signin");
+    navigate("/supplier/login");
   };
 
   const handleSubmit = async () => {
-    try {
+    try {  //username,contact, email,location,password,role
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "http://localhost:5000/api/auth/supplier/register",
         {
           username: name,
           email,
           password,
           contact: mobile,
+          location:location,
+          role:"MANUFACTURER"
         }
       );
 
@@ -33,8 +36,8 @@ export const Signup = () => {
         setSuccess(response.data.message);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        const user = response.data.user;
-        navigate("/" + `${user.role.toLowerCase()}` + "Dashboard");
+        //const user = response.data.user;
+        navigate("/supplier");
       }
     } catch (err) {
       const errorMessage =
@@ -45,12 +48,14 @@ export const Signup = () => {
     }
   };
 
+
+
   return (
     <div>
-      <div className="bg-gradient-to-br from-pink-400/80 to-amber-300/100   w-full h-screen flex items-center justify-center"> 
+      <div className="bg-gradient-to-br from-green-100/80 to-cyan-100/90  w-full h-screen flex items-center justify-center"> 
         <div className="bg-slate-50 w-96 h-3/4 rounded-xl  p-9 shadow-2xl  flex flex-col justify-evenly items-center">
           <div className="mt-2 text-center text-2xl font-bold tracking-tight text-gray-900 mb-1">
-            Sign Up
+           Supplier Sign Up
           </div>
           <div className="w-full">
             <label
@@ -114,6 +119,22 @@ export const Signup = () => {
               className="w-full p-2 border border-gray-300 rounded mb-1"
               onChange={(e) => setPassword(e.target.value)}
               value={password}
+            />
+          </div>
+          <div className="w-full mt-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-900 mb-1"
+            >
+              Location
+            </label>
+            <input
+              type="location"
+              id="location"
+              placeholder="Password"
+              className="w-full p-2 border border-gray-300 rounded mb-1"
+              onChange={(e) => setLocation(e.target.value)}
+              value={location}
             />
           </div>
           <div className="w-full mt-4 flex justify-center">

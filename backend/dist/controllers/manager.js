@@ -297,13 +297,13 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getProducts = getProducts;
-// Get all low stock items
 const lowstock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lowStockItems = yield prisma.$queryRaw `
             SELECT * FROM "Inventory" 
             WHERE quantity <= threshold
         `;
+        console.log(lowStockItems);
         if (lowStockItems.length === 0) {
             res.status(404).json({
                 success: false,
@@ -319,11 +319,6 @@ const lowstock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             threshold: item.threshold,
             reorderLevel: item.reorderLevel,
             needsReorder: item.quantity <= item.reorderLevel,
-            product: {
-                id: item.product.id,
-                name: item.product.name,
-                SKU: item.product.SKU
-            },
             supplier: item.supplier,
             lastUpdated: item.updatedAt
         }));

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken"
 import { Request, Response } from "express"
 import { PrismaClient, Role } from "@prisma/client"
 import redisClient from "../redisClient"; // Redis client
+import { Console } from "console";
 const prisma = new PrismaClient();
 
 const JWT_SECRECT = process.env.JWT_SECRET || "murali"
@@ -159,7 +160,7 @@ export const supplierRegister = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRECT, { expiresIn: "5h" });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "Supplier created successfully",
       token,
       user,
@@ -341,7 +342,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
 
 export const loginSupplier = async (req: Request, res: Response): Promise<void> => {
   const { email, password ,role} = req.body;
-
+  console.log(req.body)
   try {
     if (!email || !password) {
       res.status(400).json({
@@ -374,7 +375,7 @@ export const loginSupplier = async (req: Request, res: Response): Promise<void> 
       expiresIn: "5h",
     });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "User logged in successfully",
       token,
       status: 200,

@@ -10,7 +10,11 @@
   import  CashierDashboard  from "./Components/Cashier/CashierDashboard";
   import { ProcessPayment } from "./Components/Cashier/ProcessPayment";
 import OrderDetails from "./Components/Cashier/OrderDetails";
-  
+import SalesDashboard from "./Components/sales/SalesDashboard";
+import Dashboard from "./Components/manager/Dashboard";
+import SupplierDashboard from "./Components/supplier/SupplierDashboard";
+  import {SupplierLogin} from "./Components/SupplierLogin";
+import { SupplierRegister } from "./Components/SupplierRegister";
   function App() {
     
     return (
@@ -28,7 +32,11 @@ import OrderDetails from "./Components/Cashier/OrderDetails";
               <Route path="/cashier" element={<CashierDashboard />} />
               <Route path="/order/:orderId" element={<OrderDetails />} />
               <Route path="/payment" element={<ProcessPayment/>}/> 
-              
+              <Route path="/sales" element={<SalesDashboard/>}/>
+              <Route path="/manager" element={<Dashboard/>}/>
+              <Route path="/supplier" element={<SupplierDashboard/>}/> 
+              <Route path="/supplier/login" element={<SupplierLogin/>}/> 
+              <Route path="/supplier/register" element={<SupplierRegister/>}/> 
           </Routes>
         </BrowserRouter>
         </CartProvider>
@@ -38,3 +46,75 @@ import OrderDetails from "./Components/Cashier/OrderDetails";
   }
 
   export default App
+
+
+//   import { BrowserRouter, Routes, Route } from "react-router-dom";
+// import { Home } from "./Components/Home/Home";
+// import { Signin } from "./Components/Signin";
+// import { Signup } from "./Components/Signup";
+// import { CustomerDashboard } from "./Components/Customer/CustomerDashboard";
+// import { ProductsCard } from "./Components/Customer/ProductCard";
+// import { Cart } from "./Components/Customer/Cart";
+// import { CartProvider } from "./Components/Customer/CardContext";
+// import CashierDashboard from "./Components/Cashier/CashierDashboard";
+// import { ProcessPayment } from "./Components/Cashier/ProcessPayment";
+// import OrderDetails from "./Components/Cashier/OrderDetails";
+// import SalesDashboard from "./Components/sales/SalesDashboard";
+// import Dashboard from "./Components/manager/Dashboard";
+// import SupplierDashboard from "./Components/supplier/SupplierDashboard";
+// import { SupplierLogin } from "./Components/SupplierLogin";
+// import { SupplierRegister } from "./Components/SupplierRegister";
+// import { AuthProvider } from "./Components/AuthContext";
+// import ProtectedRoute from "./Components/ProtectedRoutes";
+
+// function App() {
+//   return (
+//     <AuthProvider>
+//       <CartProvider>
+//         <BrowserRouter>
+//           <Routes>
+//             <Route path="/" element={<Home />} />
+//             <Route path="/cart" element={<Cart />} />
+//             <Route path="/signin" element={<Signin />} />
+//             <Route path="/signup" element={<Signup />} />
+
+//             {/* Protected Routes */}
+//             <Route
+//               path="/customerDashboard"
+//               element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={["CUSTOMER"]} />}
+//             />
+//             <Route
+//               path="/cashierDashboard"
+//               element={<ProtectedRoute element={<CashierDashboard />} allowedRoles={["CASHIER"]} />}
+//             />
+//             <Route path="/productCard/:id" element={<ProductsCard />} />
+//             <Route
+//               path="/order/:orderId"
+//               element={<ProtectedRoute element={<OrderDetails />} allowedRoles={["CASHIER"]} />}
+//             />
+//             <Route
+//               path="/payment"
+//               element={<ProtectedRoute element={<ProcessPayment />} allowedRoles={["CASHIER"]} />}
+//             />
+//             <Route
+//               path="/sales"
+//               element={<ProtectedRoute element={<SalesDashboard />} allowedRoles={["SALES"]} />}
+//             />
+//             <Route
+//               path="/manager"
+//               element={<ProtectedRoute element={<Dashboard />} allowedRoles={["MANAGER"]} />}
+//             />
+//             <Route
+//               path="/supplier"
+//               element={<ProtectedRoute element={<SupplierDashboard />} allowedRoles={["SUPPLIER"]} />}
+//             />
+//             <Route path="/supplier/login" element={<SupplierLogin />} />
+//             <Route path="/supplier/register" element={<SupplierRegister />} />
+//           </Routes>
+//         </BrowserRouter>
+//       </CartProvider>
+//     </AuthProvider>
+//   );
+// }
+
+// export default App;

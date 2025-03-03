@@ -2,11 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/routes/manager.ts
 const express_1 = require("express");
+const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
-// router.get("/inventory", checkAuth("MANAGER"), listInventory);
-// router.post("/inventory", checkAuth("MANAGER"), addInventory);
-// router.put("/inventory/:id", checkAuth("MANAGER"), updateInventory);
-// router.delete("/inventory/:id", checkAuth("MANAGER"), deleteInventory);
-// router.get("/reorder", checkAuth("MANAGER"), viewLowStock);
-// router.post("/reorder", checkAuth("MANAGER"), createReorder);
+const sales_1 = require("../controllers/sales");
+const manager_1 = require("../controllers/manager");
+router.get("/overview", (0, auth_1.checkAuth)(["SALES"]), sales_1.getSalesOverview);
+router.get("/top-products", (0, auth_1.checkAuth)(["SALES"]), sales_1.getTopProducts);
+router.get("/orders", (0, auth_1.checkAuth)(["SALES"]), sales_1.getOrders);
+router.patch("/order/:id", (0, auth_1.checkAuth)(["SALES"]), sales_1.getOrderById);
+router.get("/salesbycustomer", (0, auth_1.checkAuth)(["SALES"]), sales_1.getSalesByCustomer);
+router.get("/PaymentMethods", (0, auth_1.checkAuth)(["SALES"]), sales_1.getPaymentMethods);
+router.get("/salesRegion", (0, auth_1.checkAuth)(["SALES"]), sales_1.getSalesByRegion);
+router.get("/lowstock", (0, auth_1.checkAuth)(["SALES"]), manager_1.lowstock);
+router.post("/create-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.createOrder);
+router.put("/update-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.updateOrder);
+router.delete("/delete-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.deleteOrder);
 exports.default = router;
