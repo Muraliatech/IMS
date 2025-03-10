@@ -119,7 +119,7 @@ export const Signup = () => {
           <div className="w-full mt-4 flex justify-center">
             <button
               onClick={handleSubmit}
-              className= " sm:bg-red-400 md:bg-blue-600 text-white px-10 py-2 rounded hover:bg-blue-800 font-sans lg:bg-green-400"
+              className= "bg-red-400 md:bg-blue-600 text-white px-10 py-2 rounded hover:bg-blue-800 font-sans lg:bg-green-400"
             >
               Submit
             </button>

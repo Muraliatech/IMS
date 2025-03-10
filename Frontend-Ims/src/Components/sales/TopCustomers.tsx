@@ -22,6 +22,8 @@ export function TopCustomers() {
               const response = await axios.get(`${BACKEND_URL}/api/sales/salesbycustomer`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
               });
+              const customerDatarelatedtosales = localStorage.setItem("customerData",JSON.stringify(response.data))
+              console.log(customerDatarelatedtosales)
               if (response.status === 200) {
                 setNewCustomers(response.data.newCustomers);
                 setTopCustomers(response.data.repeatCustomers);

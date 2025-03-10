@@ -15,6 +15,12 @@ import Dashboard from "./Components/manager/Dashboard";
 import SupplierDashboard from "./Components/supplier/SupplierDashboard";
   import {SupplierLogin} from "./Components/SupplierLogin";
 import { SupplierRegister } from "./Components/SupplierRegister";
+import { CustomerSales } from "./Components/sales/CustomerSales";
+//import SalesOverview from "./Components/sales/SalesOverview";
+import NewSalesOverview from "./Components/sales/NewSalesOverview";
+import Inventory from "./Components/manager/Inventory";
+import Reorder  from "./Components/manager/Reorder";
+import AddInventory from "./Components/manager/AddInventory";
   function App() {
     
     return (
@@ -31,12 +37,17 @@ import { SupplierRegister } from "./Components/SupplierRegister";
               <Route path="/productCard/:id" element={<ProductsCard />} />
               <Route path="/cashier" element={<CashierDashboard />} />
               <Route path="/order/:orderId" element={<OrderDetails />} />
-              <Route path="/payment" element={<ProcessPayment/>}/> 
+              <Route path="/payment" element={<ProcessPayment orderId="" amount={0}/>}/> 
               <Route path="/sales" element={<SalesDashboard/>}/>
+              <Route path="/sales/customers" element={<CustomerSales/>}/> 
+              <Route path="/sales/salesReports" element={<NewSalesOverview/>}/> 
               <Route path="/manager" element={<Dashboard/>}/>
               <Route path="/supplier" element={<SupplierDashboard/>}/> 
               <Route path="/supplier/login" element={<SupplierLogin/>}/> 
               <Route path="/supplier/register" element={<SupplierRegister/>}/> 
+              <Route path="/inventory" element={<Inventory/>}/>
+              <Route path="/manager/reorder" element={<Reorder/>}/>
+              <Route path="/manager/addinventory" element={<AddInventory/>}/>
           </Routes>
         </BrowserRouter>
         </CartProvider>

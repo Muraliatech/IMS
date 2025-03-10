@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate  } from "react-router-dom";
 
 import { REACT_APP_RAZORPAY_KEY_ID } from "../../../Config";
+ 
 console.log(REACT_APP_RAZORPAY_KEY_ID)
 // Define the types for Razorpay response and options
 interface RazorpayResponse {
@@ -100,6 +101,7 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({ orderId, amount 
           // Check if payment processing was successful
           if (result.ok) {
             console.log("Payment success:", data);
+            
             navigate('/cashierDashboard'); // Navigate on success
           } else {
             throw new Error(data.message || "Payment processing failed");

@@ -1,28 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { BarChart3, TrendingUp, Calendar } from "lucide-react";
 
-const data = [
-  { month: "Jan", amount: 3200 },
-  { month: "Feb", amount: 4100 },
-  { month: "Mar", amount: 6000 },
-  { month: "Apr", amount: 2700 },
-  { month: "May", amount: 4200 },
-  { month: "Jun", amount: 5400 },
-  { month: "Jul", amount: 2000 },
-  { month: "Aug", amount: 1000 },
-  { month: "Sep", amount: 3000 },
-  { month: "Oct", amount: 4100 },
-  { month: "Nov", amount: 2800 },
-  { month: "Dec", amount: 2800 },
-];
+const SalesOverview = () => {
+  interface FormattedData {
+    date: string;
+    amount: number;
+  }
 
-export function SalesOverview() {
+  const [data, setData] = useState<FormattedData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/sales/overview", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        interface SalesEntry {
+          createdAt: string;
+          _sum: {
+            total: number;
+          };
+        }
+
+        interface FormattedData {
+          date: string;
+          amount: number;
+        }
+
+        const salesTrend: SalesEntry[] = response.data.salesTrend;
+
+        const formattedData: FormattedData[] = salesTrend.map((entry) => ({
+          date: new Date(entry.createdAt).toLocaleDateString(),
+          amount: entry._sum.total,
+        })); 
+        setData(formattedData);
+        console.log(data)
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSalesData();
+  }, []);
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm w-full max-w-3xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <BarChart3 className="text-blue-600 mr-2" size={20} />
+          <BarChart3 className="text-blue-600 mr-2" size={30} />
           <h2 className="text-xl font-bold">Sales Overview</h2>
         </div>
         <div className="flex items-center space-x-2">
@@ -32,21 +63,25 @@ export function SalesOverview() {
           </button>
           <button className="flex items-center text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
             <TrendingUp size={16} className="mr-1" />
-            <span>Monthly</span>
+            <span>Daily</span>
           </button>
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data} margin={{ top: 10, right: 20, left: -20, bottom: 5 }}>
-          <YAxis tick={{ fill: "#888" }} tickFormatter={(value) => `$${value}`} domain={[0, 6000]} />
-          <XAxis dataKey="month" tick={{ fill: "#888" }} />
-          <Tooltip formatter={(value) => [`$${value}`, "Sales"]} cursor={{ fill: "transparent" }} />
-          <Bar dataKey="amount" fill="#2bf801" barSize={30} radius={[5, 5, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      {loading ? (
+        <p className="text-center text-gray-500">Loading sales data...</p>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 5 }}>
+            <YAxis tick={{ fill: "#888" }} tickFormatter={(value) => `$${value}`} />
+            <XAxis dataKey="date" tick={{ fill: "#888" }} />
+            <Tooltip formatter={(value) => [`$${value}`, "Sales"]} cursor={{ fill: "transparent" }} />
+            <Bar dataKey="amount" fill="#2bf801" barSize={30} radius={[5, 5, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
-}
+};
 
 export default SalesOverview;

@@ -107,7 +107,7 @@ const OrderDetails = () => {
     
           const response = await axios.post(
             `${BACKEND_URL}/api/cashier/order`,
-            {
+            { orderId:order.id,
               customerId: order.customerId,
               products: products,
               totalAmount: parseFloat(totalAmount.toFixed(2)),
@@ -121,15 +121,15 @@ const OrderDetails = () => {
           );
           console.log(response.data.order);
     
-          const orderId = response.data.razorpay_order_id;
-          const amt = response.data.amount;
+          const orderId = response.data.order.razorpayOrderId;
+          const amt = response.data.order.totalAmount;
     
           setOrderID(orderId);
           setAmount(amt);
     
           setShowPayment(true);
           console.log(orderId + " " + amt + " " + showPayment);
-        } catch (error) {
+        } catch {
           alert("Order failed. Please try again.");
         }
       };

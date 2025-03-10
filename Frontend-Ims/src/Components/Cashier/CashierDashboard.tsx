@@ -120,7 +120,10 @@ const CashierDashboard = () => {
             <li>
               <a>Profile</a>
             </li>
-            <li>logout</li>
+            <li><a onClick={()=>{
+              localStorage.removeItem("token");
+              window.location.href = "/signin";
+            }}>logout</a></li>
           </ul>
         </div>
       </div>
