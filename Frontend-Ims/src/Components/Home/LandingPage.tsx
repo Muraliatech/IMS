@@ -1,4 +1,4 @@
-  import React, { useState, useRef, useEffect } from "react";
+  import  { useState, useRef, useEffect } from "react";
   import { Card } from "../Card";
   //import { Link } from "react-router-dom";
   import { motion } from "framer-motion";

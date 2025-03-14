@@ -41,7 +41,7 @@
 
 // export default Sidebar;
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);

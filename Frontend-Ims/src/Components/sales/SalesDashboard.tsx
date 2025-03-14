@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import StatCard from "./StatCard";
 import SalesOverview from "./SalesOverview";
 import TopCustomers from "./TopCustomers";

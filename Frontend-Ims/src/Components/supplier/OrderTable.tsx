@@ -1,5 +1,5 @@
 // components/OrdersTable.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { proposePriceForOrder, updateProductionStatus, initiateQualityCheck, updateShippingStatus } from './api/supplier';
 
 function OrdersTable() {
