@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { useNavigate  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { REACT_APP_RAZORPAY_KEY_ID } from "../../../Config";
- 
-console.log(REACT_APP_RAZORPAY_KEY_ID)
+
+console.log(REACT_APP_RAZORPAY_KEY_ID);
 // Define the types for Razorpay response and options
 interface RazorpayResponse {
   razorpay_payment_id: string;
@@ -42,16 +42,19 @@ export interface ProcessPaymentProps {
   amount: number;
 }
 
-export const ProcessPayment: React.FC<ProcessPaymentProps> = ({ orderId, amount }) => {
-    const navigate = useNavigate();
-  
-//  const location = useLocation();
-//   const searchParams = new URLSearchParams(location.search);
-//   const orderId = searchParams.get('orderId') || '';
- //   const amount = parseInt(searchParams.get('amount') || '0', 10);
+export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
+  orderId,
+  amount,
+}) => {
+  const navigate = useNavigate();
 
-    console.log(orderId + " " + amount)
- 
+  //  const location = useLocation();
+  //   const searchParams = new URLSearchParams(location.search);
+  //   const orderId = searchParams.get('orderId') || '';
+  //   const amount = parseInt(searchParams.get('amount') || '0', 10);
+
+  console.log(orderId + " " + amount);
+
   useEffect(() => {
     const loadRazorpay = () => {
       const script = document.createElement("script");
@@ -83,32 +86,35 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({ orderId, amount 
       handler: async (response: RazorpayResponse) => {
         try {
           // Send payment details to your backend for verification
-          const result = await fetch('http://localhost:5000/api/cashier/process-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,  // Token for authentication
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            }),
-          });
+          const result = await fetch(
+            "https://ims-clxd.onrender.com/api/cashier/process-payment",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`, // Token for authentication
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            }
+          );
 
           const data = await result.json();
 
           // Check if payment processing was successful
           if (result.ok) {
             console.log("Payment success:", data);
-            
-            navigate('/cashierDashboard'); // Navigate on success
+
+            navigate("/cashierDashboard"); // Navigate on success
           } else {
             throw new Error(data.message || "Payment processing failed");
           }
         } catch (error) {
-          alert('Payment failed. Please try again.');
-          console.error('Payment Error:', error);
+          alert("Payment failed. Please try again.");
+          console.error("Payment Error:", error);
         }
       },
       prefill: {
@@ -129,12 +135,11 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({ orderId, amount 
   return (
     <div>
       <button
-      onClick={handlePayment}
-      className="w-full bg-blue-600 hover:bg-blue-800 text-white px-2 py-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
-    >
-      Pay
-    </button>
-
+        onClick={handlePayment}
+        className="w-full bg-blue-600 hover:bg-blue-800 text-white px-2 py-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+      >
+        Pay
+      </button>
     </div>
   );
 };

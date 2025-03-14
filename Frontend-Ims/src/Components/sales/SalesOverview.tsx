@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { BarChart3, TrendingUp, Calendar } from "lucide-react";
 
 const SalesOverview = () => {
@@ -15,9 +22,14 @@ const SalesOverview = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/sales/overview", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await axios.get(
+          "https://ims-clxd.onrender.com/api/sales/overview",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         interface SalesEntry {
           createdAt: string;
@@ -36,9 +48,9 @@ const SalesOverview = () => {
         const formattedData: FormattedData[] = salesTrend.map((entry) => ({
           date: new Date(entry.createdAt).toLocaleDateString(),
           amount: entry._sum.total,
-        })); 
+        }));
         setData(formattedData);
-        console.log(data)
+        console.log(data);
       } catch (error) {
         console.error("Error fetching sales data:", error);
       } finally {
@@ -72,11 +84,25 @@ const SalesOverview = () => {
         <p className="text-center text-gray-500">Loading sales data...</p>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 5 }}>
-            <YAxis tick={{ fill: "#888" }} tickFormatter={(value) => `$${value}`} />
+          <BarChart
+            data={data}
+            margin={{ top: 10, right: 20, left: -10, bottom: 5 }}
+          >
+            <YAxis
+              tick={{ fill: "#888" }}
+              tickFormatter={(value) => `$${value}`}
+            />
             <XAxis dataKey="date" tick={{ fill: "#888" }} />
-            <Tooltip formatter={(value) => [`$${value}`, "Sales"]} cursor={{ fill: "transparent" }} />
-            <Bar dataKey="amount" fill="#2bf801" barSize={30} radius={[5, 5, 0, 0]} />
+            <Tooltip
+              formatter={(value) => [`$${value}`, "Sales"]}
+              cursor={{ fill: "transparent" }}
+            />
+            <Bar
+              dataKey="amount"
+              fill="#2bf801"
+              barSize={30}
+              radius={[5, 5, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       )}

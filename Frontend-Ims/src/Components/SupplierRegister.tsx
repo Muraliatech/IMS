@@ -17,16 +17,17 @@ export const SupplierRegister = () => {
   };
 
   const handleSubmit = async () => {
-    try {  //username,contact, email,location,password,role
+    try {
+      //username,contact, email,location,password,role
       const response = await axios.post(
-        "http://localhost:5000/api/auth/supplier/register",
+        "https://ims-clxd.onrender.com/api/auth/supplier/register",
         {
           username: name,
           email,
           password,
           contact: mobile,
-          location:location,
-          role:"MANUFACTURER"
+          location: location,
+          role: "MANUFACTURER",
         }
       );
 
@@ -48,14 +49,12 @@ export const SupplierRegister = () => {
     }
   };
 
-
-
   return (
     <div>
-      <div className="bg-gradient-to-br from-green-100/80 to-cyan-100/90  w-full h-screen flex items-center justify-center"> 
+      <div className="bg-gradient-to-br from-green-100/80 to-cyan-100/90  w-full h-screen flex items-center justify-center">
         <div className="bg-slate-50 w-96 h-3/4 rounded-xl  p-9 shadow-2xl  flex flex-col justify-evenly items-center">
           <div className="mt-2 text-center text-2xl font-bold tracking-tight text-gray-900 mb-1">
-           Supplier Sign Up
+            Supplier Sign Up
           </div>
           <div className="w-full">
             <label
@@ -140,7 +139,7 @@ export const SupplierRegister = () => {
           <div className="w-full mt-4 flex justify-center">
             <button
               onClick={handleSubmit}
-              className= " sm:bg-red-400 md:bg-blue-600 text-white px-10 py-2 rounded hover:bg-blue-800 font-sans lg:bg-green-400"
+              className=" sm:bg-red-400 md:bg-blue-600 text-white px-10 py-2 rounded hover:bg-blue-800 font-sans lg:bg-green-400"
             >
               Submit
             </button>

@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { BarChart3, TrendingUp, Calendar } from "lucide-react";
 import { NavBar } from "../sales/NavBar";
 
@@ -16,9 +23,14 @@ const NewSalesOverview = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/sales/overview", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await axios.get(
+          "https://ims-clxd.onrender.com/api/sales/overview",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         interface SalesEntry {
           createdAt: string;
@@ -47,15 +59,12 @@ const NewSalesOverview = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-      
       <div className="w-full md:w-1/5 bg-white shadow-md p-4">
         <NavBar />
       </div>
 
-       
       <div className="flex flex-col flex-grow items-center justify-center p-4 w-full md:w-4/5">
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
-          
           <div className="flex flex-col md:flex-row items-center justify-between mb-6">
             <div className="flex items-center space-x-2">
               <BarChart3 className="text-blue-600" size={30} />
@@ -73,16 +82,29 @@ const NewSalesOverview = () => {
             </div>
           </div>
 
-          
           {loading ? (
             <p className="text-center text-gray-500">Loading sales data...</p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 5 }}>
-                <YAxis tick={{ fill: "#888" }} tickFormatter={(value) => `$${value}`} />
+              <BarChart
+                data={data}
+                margin={{ top: 10, right: 20, left: -10, bottom: 5 }}
+              >
+                <YAxis
+                  tick={{ fill: "#888" }}
+                  tickFormatter={(value) => `$${value}`}
+                />
                 <XAxis dataKey="date" tick={{ fill: "#888" }} />
-                <Tooltip formatter={(value) => [`$${value}`, "Sales"]} cursor={{ fill: "transparent" }} />
-                <Bar dataKey="amount" fill="#2bf801" barSize={30} radius={[5, 5, 0, 0]} />
+                <Tooltip
+                  formatter={(value) => [`$${value}`, "Sales"]}
+                  cursor={{ fill: "transparent" }}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="#2bf801"
+                  barSize={30}
+                  radius={[5, 5, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}

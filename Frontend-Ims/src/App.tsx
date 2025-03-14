@@ -33,6 +33,7 @@ import AddInventory from "./Components/manager/AddInventory";
             <Route path="/signin" element={<Signin />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/customerDashboard" element={<CustomerDashboard />} />
+            <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/cashierDashboard" element={<CashierDashboard />} />
               <Route path="/productCard/:id" element={<ProductsCard />} />
               <Route path="/cashier" element={<CashierDashboard />} />

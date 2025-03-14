@@ -45,7 +45,7 @@ interface Summary {
 
 const Reorder = () => {
   const { data, loading, error } = useFetch<FetchResponse>(
-    "http://localhost:5000/api/manager/lowstock"
+    "https://ims-clxd.onrender.com/api/manager/lowstock"
   );
   console.log(data);
 

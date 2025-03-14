@@ -15,35 +15,32 @@ interface Product {
   price: number;
   imageUrls: string[];
   description: string;
-  stock:number;
-  SKU:string;
+  stock: number;
+  SKU: string;
   discountInformation?: DiscountInformation; // Discount is optional now
 }
 
 export const ProductsCard = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
-  const [isAddedToCart, setIsAddedToCart] = useState(false);  
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
   const navigate = useNavigate();
-  const { addToCart } = useCart();  
+  const { addToCart } = useCart();
 
   useEffect(() => {
     async function fetchItem() {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/customer/products/${id}`,
+          `https://ims-clxd.onrender.com/api/customer/products/${id}`,
           {
-            
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
             },
           }
         );
-        
-      
-          setProduct(response.data.product);
-          
+
+        setProduct(response.data.product);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
@@ -71,7 +68,6 @@ export const ProductsCard = () => {
 
   const handleAddToCart = (product: Product) => {
     if (product) {
-      
       addToCart(product);
       setIsAddedToCart(true);
     }
@@ -96,7 +92,6 @@ export const ProductsCard = () => {
     <div>
       <Navbar />
       <div className="flex flex-row justify-center items-center px-10 mt-10">
-         
         <div className="flex flex-col items-center">
           <img
             src={product.imageUrls[0]}
@@ -107,7 +102,6 @@ export const ProductsCard = () => {
           />
         </div>
 
-        
         <div className="text-center mx-10 flex-grow">
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <h3 className="text-lg mt-4 font-semibold">{product.description}</h3>
@@ -139,7 +133,6 @@ export const ProductsCard = () => {
           </div>
         </div>
 
-       
         <div className="flex flex-col items-start">
           <div className="flex items-center mb-4">
             <div className="text-green-700 font-semibold text-xl mr-4">
@@ -149,8 +142,8 @@ export const ProductsCard = () => {
           </div>
 
           {isAddedToCart ? (
-            <button 
-              onClick={handleGoToCart}  
+            <button
+              onClick={handleGoToCart}
               className="border p-2 rounded bg-green-500 text-white hover:bg-green-600 transition duration-200 w-full"
             >
               Go to Cart
