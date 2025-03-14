@@ -42,32 +42,111 @@ const razorpay = new Razorpay({
 });
 
 // Controller to create an order
+// export const order = async (req: Request, res: Response) => {
+//     const { id,customerId, products }: {id:string, customerId: string; products: { productId: string; quantity: number }[] } = req.body;
+
+//     try {
+//         let totalAmount = 0;
+//         const orderProducts = [];
+//         const productIds = products.map((p) => p.productId).filter((id) => id !== undefined);
+//         console.log("Filtered productIds:", productIds);
+        
+//         const fetchedProducts = await prisma.product.findMany({
+//             where: { id: { in: productIds } },
+//         });
+        
+//         const productMap = new Map(fetchedProducts.map((p) => [p.id, p]));
+
+//         for (const { productId, quantity } of products) {
+//             const product = productMap.get(productId);
+
+//             if (!product) {
+//                 res.status(400).json({ message: `Product with ID ${productId} not found` });
+//                 return;
+//             }
+
+//             if (product.stock < quantity) {
+//                 res.status(400).json({ message: `Insufficient stock for product ${product.name}` });
+//                 return;
+//             }
+
+//             const productTotal = product.price * quantity;
+//             totalAmount += productTotal;
+
+//             orderProducts.push({
+//                 productId: product.id,
+//                 quantity,
+//                 price: product.price,
+//             });
+//         }
+
+//         totalAmount = parseFloat(totalAmount.toFixed(2));
+
+//         const razorpayOrder = await razorpay.orders.create({
+//             amount: Math.round(totalAmount * 100),
+//             currency: 'INR',
+//             receipt: `order_receipt_${Date.now()}`,
+//             payment_capture: true,
+//         });
+
+//         const newOrder = await prisma.order.create({
+//             data: {
+//                 customerId,
+//                 status: OrderStatus_new.PENDING,
+//                 totalAmount,
+//                 paymentStatus: PaymentStatus.PENDING,
+//                 orderType: OrderType.CUSTOMER,
+//                 razorpayOrderId: razorpayOrder.id,
+//                 products: {
+//                     create: orderProducts.map((orderProduct) => ({
+//                         productId: orderProduct.productId,
+//                         quantity: orderProduct.quantity,
+//                         requestedPrice: orderProduct.price,
+//                     })),
+//                 },
+//             },
+//             include: {
+//                 products: true,
+//             },
+//         });
+
+//         res.status(201).json({
+//             message: "Order created successfully",
+//             order: newOrder,
+//             razorpay_order_id: razorpayOrder.id,
+//             amount: totalAmount,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: "Internal server error", error: (error as Error).message });
+//     }
+// };
 export const order = async (req: Request, res: Response) => {
-    const { customerId, products }: { customerId: string; products: { productId: string; quantity: number }[] } = req.body;
+    const { orderId, customerId, products }: { orderId: string, customerId: string; products: { productId: string; quantity: number }[] } = req.body;
 
     try {
         let totalAmount = 0;
         const orderProducts = [];
         const productIds = products.map((p) => p.productId).filter((id) => id !== undefined);
         console.log("Filtered productIds:", productIds);
-        
+
         const fetchedProducts = await prisma.product.findMany({
             where: { id: { in: productIds } },
         });
-        
+
         const productMap = new Map(fetchedProducts.map((p) => [p.id, p]));
 
         for (const { productId, quantity } of products) {
             const product = productMap.get(productId);
 
             if (!product) {
-                res.status(400).json({ message: `Product with ID ${productId} not found` });
-                return;
+                 res.status(400).json({ message: `Product with ID ${productId} not found` });
+                 return
             }
 
             if (product.stock < quantity) {
-                res.status(400).json({ message: `Insufficient stock for product ${product.name}` });
-                return;
+             res.status(400).json({ message: `Insufficient stock for product ${product.name}` });
+             return
             }
 
             const productTotal = product.price * quantity;
@@ -82,22 +161,24 @@ export const order = async (req: Request, res: Response) => {
 
         totalAmount = parseFloat(totalAmount.toFixed(2));
 
-        const razorpayOrder = await razorpay.orders.create({
-            amount: Math.round(totalAmount * 100),
-            currency: 'INR',
-            receipt: `order_receipt_${Date.now()}`,
-            payment_capture: true,
+        // Check if order exists using `orderId`
+        const existingOrder = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: { products: true },
         });
 
-        const newOrder = await prisma.order.create({
+        if (!existingOrder) {
+             res.status(404).json({ message: `Order with ID ${orderId} not found` });
+             return
+        }
+
+        // **Update existing order**
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderId },
             data: {
-                customerId,
-                status: OrderStatus_new.PENDING,
                 totalAmount,
-                paymentStatus: PaymentStatus.PENDING,
-                orderType: OrderType.CUSTOMER,
-                razorpayOrderId: razorpayOrder.id,
                 products: {
+                    deleteMany: {}, // Remove all existing products in the order
                     create: orderProducts.map((orderProduct) => ({
                         productId: orderProduct.productId,
                         quantity: orderProduct.quantity,
@@ -105,17 +186,15 @@ export const order = async (req: Request, res: Response) => {
                     })),
                 },
             },
-            include: {
-                products: true,
-            },
+            include: { products: true },
         });
 
-        res.status(201).json({
-            message: "Order created successfully",
-            order: newOrder,
-            razorpay_order_id: razorpayOrder.id,
-            amount: totalAmount,
+         res.status(200).json({
+            message: "Order updated successfully",
+            order: updatedOrder,
         });
+        return
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error", error: (error as Error).message });
@@ -186,6 +265,8 @@ export const processPayment = async (req: Request, res: Response) => {
                 status: OrderStatus_new.COMPLETED,
             },
         });
+
+
 
         // Batch inventory and transaction updates
         // const transactionPromises = order.products.map(async (product) => {
@@ -266,7 +347,7 @@ export const processPayment = async (req: Request, res: Response) => {
         await Promise.all(transactionPromises);
         
 
-
+            console.log(updatedOrder)
         // Wait for all updates to complete
         await Promise.all(transactionPromises);
 
@@ -461,7 +542,8 @@ export const getCustomerOrders = async (req: Request, res: Response) => {
         const orders = await prisma.order.findMany({
             where: {
                 orderType: OrderType.CUSTOMER,
-                status:OrderStatus_new.PENDING
+                status:OrderStatus_new.PENDING,
+                paymentStatus:PaymentStatus.PENDING
             },
             select: {
                 id: true,

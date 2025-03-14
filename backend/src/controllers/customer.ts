@@ -57,7 +57,7 @@ export const order = async (req: Request, res: Response) => {
         const order = await prisma.order.create({
             data: {
                 customerId: customerid,   
-                orderType: "CUSTOMER",
+                orderType: OrderType.CUSTOMER,
                 status: "PENDING",
                 totalAmount: totalAmount,
                 paymentStatus: "PENDING",
@@ -72,7 +72,7 @@ export const order = async (req: Request, res: Response) => {
                 products: true,
             },
         });
-
+        
 
         
 

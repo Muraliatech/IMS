@@ -44,7 +44,6 @@ exports.getInventoryItem = getInventoryItem;
 const addInventoryItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { productId, quantity, threshold, price, expirationDate, reorderLevel, reorderQuantity } = req.body;
     try {
-        // Check if the product exists
         const product = yield prisma.product.findUnique({
             where: { id: productId },
             select: {
@@ -58,30 +57,27 @@ const addInventoryItem = (req, res) => __awaiter(void 0, void 0, void 0, functio
             res.status(404).json({ message: "Product not found" });
             return;
         }
-        // Create the inventory item
         const inventoryItem = yield prisma.inventory.create({
             data: {
-                name: product.name, // Assuming name is linked to product
+                name: product.name,
                 category: product.category || "",
                 quantity,
                 threshold,
                 price,
                 expirationDate,
-                reorderLevel, // Include the reorderLevel property
-                reorderQuantity, // Include the reorderQuantity property
+                reorderLevel,
+                reorderQuantity,
                 product: { connect: { id: productId } },
             },
         });
-        // Update the supplierId in the inventory item if it exists
         if (product.supplierId) {
             yield prisma.inventory.update({
                 where: { id: inventoryItem.id },
                 data: {
-                    supplierId: product.supplierId, // Setting the supplierId for the inventory item
+                    supplierId: product.supplierId,
                 },
             });
         }
-        // Success response
         res.status(201).json({ message: "Inventory item added successfully", inventoryItem });
     }
     catch (err) {

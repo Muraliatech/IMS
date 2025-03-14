@@ -15,7 +15,7 @@ const router = Router();
 import { listInventory, getInventoryItem, addInventoryItem, updateInventory,reviewPriceProposal,addProduct, addProducts, getProducts, getProductById, updateProduct, lowstock, checkInventoryLevels, qualityCheck, markOrderAsDelivered } from "../controllers/manager";
 router.get("/inventory", checkAuth(["MANAGER"]), listInventory);
 router.get("/inventoryItem/:id", checkAuth(["MANAGER"]), getInventoryItem);
-router.post("/addinventory", checkAuth(["MANAGER"]), addInventoryItem);
+router.post("/addinventory", checkAuth(["MANAGER"]), addInventoryItem); 
 router.put("/inventory/:id", checkAuth(["MANAGER"]), updateInventory);
 // router.delete("/inventory/:id", checkAuth(["MANAGER"]), deleteInventory);
 

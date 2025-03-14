@@ -56,7 +56,7 @@ const order = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const order = yield prisma.order.create({
             data: {
                 customerId: customerid,
-                orderType: "CUSTOMER",
+                orderType: client_1.OrderType.CUSTOMER,
                 status: "PENDING",
                 totalAmount: totalAmount,
                 paymentStatus: "PENDING",

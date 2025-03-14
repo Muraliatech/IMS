@@ -12,7 +12,7 @@ import { lowstock } from "../controllers/manager";
  router.get("/salesbycustomer",checkAuth(["SALES"]),getSalesByCustomer)
  router.get("/PaymentMethods",checkAuth(["SALES"]),getPaymentMethods)
 router.get("/salesRegion",checkAuth(["SALES"]),getSalesByRegion)
-router.get("/lowstock",checkAuth(["SALES"]),lowstock)
+router.get("/lowstock",checkAuth(["SALES","MANAGER"]),lowstock)
 
 
 

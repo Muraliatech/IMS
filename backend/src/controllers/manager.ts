@@ -47,7 +47,7 @@ export const addInventoryItem = async (req: Request, res: Response) => {
     const { productId, quantity, threshold, price, expirationDate, reorderLevel, reorderQuantity } = req.body;
 
     try {
-        // Check if the product exists
+      
         const product = await prisma.product.findUnique({
             where: { id: productId },
             select: {
@@ -63,32 +63,32 @@ export const addInventoryItem = async (req: Request, res: Response) => {
             return;
         }
 
-        // Create the inventory item
+        
         const inventoryItem = await prisma.inventory.create({
             data: {
-                name: product.name, // Assuming name is linked to product
+                name: product.name,  
                 category: product.category || "",
                 quantity,
                 threshold,
                 price,
                 expirationDate,
-                reorderLevel, // Include the reorderLevel property
-                reorderQuantity, // Include the reorderQuantity property
+                reorderLevel,  
+                reorderQuantity, 
                 product: { connect: { id: productId } },
             },
         });
 
-        // Update the supplierId in the inventory item if it exists
+        
         if (product.supplierId) {
             await prisma.inventory.update({
                 where: { id: inventoryItem.id },
                 data: {
-                    supplierId: product.supplierId, // Setting the supplierId for the inventory item
+                    supplierId: product.supplierId, 
                 },
             });
         }
 
-        // Success response
+        
         res.status(201).json({ message: "Inventory item added successfully", inventoryItem });
     } catch (err) {
         console.error(err);

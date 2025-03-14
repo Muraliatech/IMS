@@ -13,7 +13,7 @@ router.patch("/order/:id", (0, auth_1.checkAuth)(["SALES"]), sales_1.getOrderByI
 router.get("/salesbycustomer", (0, auth_1.checkAuth)(["SALES"]), sales_1.getSalesByCustomer);
 router.get("/PaymentMethods", (0, auth_1.checkAuth)(["SALES"]), sales_1.getPaymentMethods);
 router.get("/salesRegion", (0, auth_1.checkAuth)(["SALES"]), sales_1.getSalesByRegion);
-router.get("/lowstock", (0, auth_1.checkAuth)(["SALES"]), manager_1.lowstock);
+router.get("/lowstock", (0, auth_1.checkAuth)(["SALES", "MANAGER"]), manager_1.lowstock);
 router.post("/create-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.createOrder);
 router.put("/update-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.updateOrder);
 router.delete("/delete-order", (0, auth_1.checkAuth)(["SALES"]), sales_1.deleteOrder);
