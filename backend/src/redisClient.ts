@@ -35,3 +35,4 @@ redisClient.on("reconnecting", () => {
 });
 
 export default redisClient;
+//https://console.upstash.com/redis/2b6762e0-bbad-49ff-b690-21af8f7759d5?teamid=0
