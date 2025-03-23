@@ -14,7 +14,7 @@ interface Customer {
 export function TopCustomers() {
 
     const [total, setTotal] = useState(0);
-    const [newCustomers, setNewCustomers] = useState(0);
+    //const [newCustomers, setNewCustomers] = useState(0);
     const [topCustomers, setTopCustomers] = useState<Customer[]>([]);
      useEffect(()=>{
         async function fetchNewCustomers() {
@@ -25,7 +25,7 @@ export function TopCustomers() {
               const customerDatarelatedtosales = localStorage.setItem("customerData",JSON.stringify(response.data))
               console.log(customerDatarelatedtosales)
               if (response.status === 200) {
-                setNewCustomers(response.data.newCustomers);
+                //setNewCustomers(response.data.newCustomers);
                 setTopCustomers(response.data.repeatCustomers);
                 setTotal(response.data.totalCustomers)
               }

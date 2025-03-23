@@ -21,7 +21,7 @@ export const Card: React.FC<CardProps> = (props) => {
           <h2 className="text-gray-950 font-semibold text-lg mb-2">{heading}</h2>
            
           <ul className="text-gray-400">
-            {props.ele[index].map((item, itemIndex) => (
+            {props.ele[index]?.map((item, itemIndex) => (
               <li key={itemIndex} className="mb-1">
                 <a 
                   onClick={() => handleClick(item)}

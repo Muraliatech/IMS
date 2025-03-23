@@ -48,10 +48,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (existingItemIndex !== -1) {
          
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex] = {
-          ...updatedCart[existingItemIndex],
-          quantity: updatedCart[existingItemIndex].quantity + 1
-        };
+        if (updatedCart[existingItemIndex]) {
+          updatedCart[existingItemIndex] = {
+            ...updatedCart[existingItemIndex],
+            id: updatedCart[existingItemIndex].id,
+            name: updatedCart[existingItemIndex].name,
+            price: updatedCart[existingItemIndex].price,
+            imageUrls: updatedCart[existingItemIndex].imageUrls,
+            description: updatedCart[existingItemIndex].description,
+            stock: updatedCart[existingItemIndex].stock,
+            SKU: updatedCart[existingItemIndex].SKU,
+            quantity: updatedCart[existingItemIndex].quantity + 1
+          };
+        }
         return updatedCart;
       } else {
        

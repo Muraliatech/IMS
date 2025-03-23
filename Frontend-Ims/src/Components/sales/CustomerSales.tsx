@@ -11,7 +11,7 @@ interface Customer {
 
 export const CustomerSales = () => {
   const [total, setTotal] = useState(0);
-  const [newCustomers, setNewCustomers] = useState(0);
+ // const [newCustomers, setNewCustomers] = useState(0);
   const [topCustomers, setTopCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export const CustomerSales = () => {
 
     if (customerData) {
       setTotal(customerData.totalCustomers);
-      setNewCustomers(customerData.newCustomers);
+      //setNewCustomers(customerData.newCustomers);
       setTopCustomers(customerData.repeatCustomers);
     }
   }, []);

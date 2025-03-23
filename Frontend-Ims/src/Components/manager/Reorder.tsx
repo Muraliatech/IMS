@@ -33,8 +33,10 @@ interface InventoryProp {
 //     }
 // }
 interface FetchResponse {
-  inventory: InventoryProp[];
-  summary: Summary[];
+  data: {
+    items: InventoryProp[];
+    summary: Summary;
+  };
 }
 
 interface Summary {
@@ -43,10 +45,16 @@ interface Summary {
   criticalItems: number;
 }
 
+// const { data = {} as FetchResponse, loading, error } = useFetch(
+//   "http://localhost:5000/api/manager/inventory"
+// );
+
 const Reorder = () => {
-  const { data, loading, error } = useFetch<FetchResponse>(
-    "https://ims-clxd.onrender.com/api/manager/lowstock"
-  );
+  const {
+    data = {} as FetchResponse,
+    loading,
+    error,
+  } = useFetch("http://localhost:5000/api/manager/lowstock");
   console.log(data);
 
   const reorderItem: InventoryProp[] = Array.isArray(data?.data.items)

@@ -19,7 +19,11 @@ const useFetch = (url: string) => {
         setData(response.data);
         console.log(response.data);
       } catch (err) {
-        setError(err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(String(err));
+        }
       } finally {
         setLoading(false);
       }
