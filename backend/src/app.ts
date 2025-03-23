@@ -30,10 +30,10 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: '*', // Allow requests from this domain
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-    credentials: true, // Allow cookies and credentials
+    origin: 'https://inventorysolutions.vercel.app',  
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+    credentials: true,  
   })
 );
 app.use(morgan("dev"));
