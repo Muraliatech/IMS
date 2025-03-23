@@ -6,7 +6,8 @@ import redisClient from "../redisClient"; // Redis client
 import { Console } from "console";
 const prisma = new PrismaClient();
 
-const JWT_SECRECT = process.env.JWT_SECRET || "murali"
+const JWT_SECRECT = process.env.JWT_SECRET || "murali@222"
+console.log(JWT_SECRECT)
 export const register = async (req: Request, res: Response) => {
   const { username, email, password ,contact} = req.body;
   console.log(req.body)
@@ -238,7 +239,7 @@ export const supplierRegister = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
-
+ 
   try {
     if (!email || !password) {
       res.status(400).json({
@@ -268,7 +269,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ id: existingUser.id, role: existingUser.role }, JWT_SECRECT, {
-      expiresIn: "5h",
+      expiresIn: "24h",
     });
 
     res.status(201).json({

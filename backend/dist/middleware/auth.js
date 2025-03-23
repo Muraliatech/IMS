@@ -13,9 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkBlacklist = exports.handleValidationErrors = exports.validateCustomer = exports.validationLogin = exports.validationRegister = exports.checkAuth = void 0;
+// src/middleware/auth.ts
+require("dotenv/config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_validator_1 = require("express-validator");
 const redisClient_1 = __importDefault(require("../redisClient"));
+console.log(process.env.JWT_SECRET);
 const checkAuth = (roles) => {
     return (req, res, next) => {
         var _a;
@@ -26,9 +29,9 @@ const checkAuth = (roles) => {
             return;
         }
         try {
+            console.log(process.env.JWT_SECRET);
             const user = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             console.log(user);
-            // Check if the user's role matches the required role
             console.log(user.role + " " + roles + " " + "user : " + user);
             if (!roles.includes(user.role)) {
                 res.status(403).json({ message: "Forbidden2 user not found" });
@@ -42,6 +45,7 @@ const checkAuth = (roles) => {
             next();
         }
         catch (error) {
+            console.log("error" + error);
             res.status(403).json({ message: "Forbidden | Session Expired reLogin" });
             return;
         }

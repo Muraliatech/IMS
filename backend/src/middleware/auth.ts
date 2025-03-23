@@ -1,4 +1,5 @@
 // src/middleware/auth.ts
+import 'dotenv/config';  
 import { Role,SupplierRole } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 import jwt,{JwtPayload} from "jsonwebtoken";
@@ -13,6 +14,8 @@ declare global {
   }
 }
 
+ 
+  console.log(process.env.JWT_SECRET);
 interface JwtPayloadWithRole extends JwtPayload {
   id: string;
   role: string;
@@ -29,11 +32,11 @@ export const checkAuth = (roles: (Role | SupplierRole)[]) => {
     }
 
     try {
+      console.log(process.env.JWT_SECRET)
       const user = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayloadWithRole;
       console.log(user)
 
-      // Check if the user's role matches the required role
-      console.log(user.role + " " + roles + " " + "user : "+user);
+       console.log(user.role + " " + roles + " " + "user : "+user);
       if (!roles.includes(user.role as Role | SupplierRole)) {
           res.status(403).json({ message: "Forbidden2 user not found" });
           return
@@ -47,6 +50,7 @@ export const checkAuth = (roles: (Role | SupplierRole)[]) => {
 
       next();
     } catch (error) {
+      console.log("error" + error)
       res.status(403).json({ message: "Forbidden | Session Expired reLogin" });
       return
     }

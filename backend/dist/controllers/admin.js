@@ -16,7 +16,7 @@ exports.updateRole = exports.deleteUser = exports.updateUser = exports.listUsers
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const JWT_SECRECT = process.env.JWT_SECRET || "murali";
+const JWT_SECRECT = process.env.JWT_SECRET || "murali@222";
 const prisma = new client_1.PrismaClient();
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, email, role } = req.body;

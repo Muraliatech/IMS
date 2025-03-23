@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express"
 import { PrismaClient, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { body } from 'express-validator';
-const JWT_SECRECT = process.env.JWT_SECRET || "murali"
+const JWT_SECRECT = process.env.JWT_SECRET || "murali@222"
 const prisma = new PrismaClient();
 export const createUser = async (req: Request, res: Response,) => {
     const { username, email, role } = req.body;

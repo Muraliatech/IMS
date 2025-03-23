@@ -18,7 +18,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const redisClient_1 = __importDefault(require("../redisClient")); // Redis client
 const prisma = new client_1.PrismaClient();
-const JWT_SECRECT = process.env.JWT_SECRET || "murali";
+const JWT_SECRECT = process.env.JWT_SECRET || "murali@222";
+console.log(JWT_SECRECT);
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, email, password, contact } = req.body;
     console.log(req.body);
@@ -244,7 +245,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         const token = jsonwebtoken_1.default.sign({ id: existingUser.id, role: existingUser.role }, JWT_SECRECT, {
-            expiresIn: "5h",
+            expiresIn: "24h",
         });
         res.status(201).json({
             message: "User logged in successfully",
