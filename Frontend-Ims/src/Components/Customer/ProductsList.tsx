@@ -10,7 +10,7 @@ export const ProductsList = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/customer/products",
+          "https://ims-clxd.onrender.com/api/customer/products",
           {
             headers: {
               "Content-Type": "application/json",

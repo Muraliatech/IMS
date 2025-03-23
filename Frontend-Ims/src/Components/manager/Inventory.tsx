@@ -33,7 +33,7 @@ const Inventory = () => {
     data = {} as FetchResponse,
     loading,
     error,
-  } = useFetch("http://localhost:5000/api/manager/inventory");
+  } = useFetch("https://ims-clxd.onrender.com/api/manager/inventory");
 
   const inventory: InventoryProp[] = Array.isArray(data?.inventory)
     ? data.inventory

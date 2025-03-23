@@ -158,8 +158,8 @@ const OrderDetails = () => {
             console.log("Error:", response.data);
             navigate("/cashierDashboard")
           }
-        } catch (err: any) {
-          if (err.response) {
+        } catch (err: unknown) {
+          if (axios.isAxiosError(err) && err.response) {
             if (err.response.status === 409) {
               setError("Order is already canceled.");
               navigate("/cashierDashboard")
