@@ -46,7 +46,7 @@ interface Summary {
 }
 
 // const { data = {} as FetchResponse, loading, error } = useFetch(
-//   "https://ims-clxd.onrender.com/api/manager/inventory"
+//   "https://ims-clxd.onrender.commanager/inventory"
 // );
 
 const Reorder = () => {
