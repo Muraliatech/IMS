@@ -24,7 +24,7 @@ interface JwtPayloadWithRole extends JwtPayload {
 export const checkAuth = (roles: (Role | SupplierRole)[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token)
+      
 
     if (!token) {
        res.status(401).json({ message: "Unauthorized" });
@@ -38,7 +38,7 @@ export const checkAuth = (roles: (Role | SupplierRole)[]) => {
 
        console.log(user.role + " " + roles + " " + "user : "+user);
       if (!roles.includes(user.role as Role | SupplierRole)) {
-          res.status(403).json({ message: "Forbidden2 user not found" });
+          res.status(403).json({ message: "User Not Found | Forbidden" });
           return
       }
 

@@ -23,7 +23,6 @@ const checkAuth = (roles) => {
     return (req, res, next) => {
         var _a;
         const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
-        console.log(token);
         if (!token) {
             res.status(401).json({ message: "Unauthorized" });
             return;
@@ -34,7 +33,7 @@ const checkAuth = (roles) => {
             console.log(user);
             console.log(user.role + " " + roles + " " + "user : " + user);
             if (!roles.includes(user.role)) {
-                res.status(403).json({ message: "Forbidden2 user not found" });
+                res.status(403).json({ message: "User Not Found | Forbidden" });
                 return;
             }
             // Attach the user to the request object
