@@ -49,7 +49,7 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const[loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
 
   //  const location = useLocation();
   //   const searchParams = new URLSearchParams(location.search);
@@ -72,8 +72,7 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
   // Handle the payment process
   const handlePayment = () => {
-
-    if(loading) return ;
+    if (loading) return;
 
     setLoading(true);
     // Ensure Razorpay SDK is loaded before proceeding
@@ -94,7 +93,7 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         try {
           // Send payment details to your backend for verification
           const result = await fetch(
-            "http://localhost:5000/api/cashier/process-payment",
+            "https://ims-clxd.onrender.com/api/cashier/process-payment",
             {
               method: "POST",
               headers: {
@@ -122,11 +121,9 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         } catch (error) {
           alert("Payment failed. Please try again.");
           console.error("Payment Error:", error);
-        }
-        finally{
+        } finally {
           setLoading(false);
         }
-
       },
       prefill: {
         name: "Your Name", // Prefill customer details
@@ -145,12 +142,16 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
   return (
     <div>
-      {loading ? <LoadingBUtton/>:<button
-        onClick={handlePayment}
-        className="w-full h-12 bg-blue-600 hover:bg-blue-900 text-white py-2 px-17 rounded-lg flex items-center justify-center  cursor-pointer"
-      >
-        Pay
-      </button>}
+      {loading ? (
+        <LoadingBUtton />
+      ) : (
+        <button
+          onClick={handlePayment}
+          className="w-full h-12 bg-blue-600 hover:bg-blue-900 text-white py-2 px-17 rounded-lg flex items-center justify-center  cursor-pointer"
+        >
+          Pay
+        </button>
+      )}
     </div>
   );
 };

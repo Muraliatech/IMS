@@ -13,7 +13,7 @@
 //     }
 //     const handleSubmit =async()=>{
 //        try{
-//         const response  = await axios.post('http://localhost:5000auth/login', {
+//         const response  = await axios.post('https://ims-clxd.onrender.comauth/login', {
 //             email:email,
 //             password:password
 
@@ -123,7 +123,7 @@ export const Signin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
- const [loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = () => {
@@ -131,11 +131,13 @@ export const Signin = () => {
   };
 
   const handleSubmit = async () => {
-    if(loading){return;}
+    if (loading) {
+      return;
+    }
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://ims-clxd.onrender.com/api/auth/login",
         {
           email,
           password,
@@ -212,14 +214,18 @@ export const Signin = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {loading ? <LoadingBUtton/> : <div className="w-full flex justify-center">
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-10 py-2 rounded hover:bg-sky-600 font-sans cursor-pointer mb-2"
-          >
-            Sign in
-          </button>
-        </div>}
+          {loading ? (
+            <LoadingBUtton />
+          ) : (
+            <div className="w-full flex justify-center">
+              <button
+                onClick={handleSubmit}
+                className="bg-blue-600 text-white px-10 py-2 rounded hover:bg-sky-600 font-sans cursor-pointer mb-2"
+              >
+                Sign in
+              </button>
+            </div>
+          )}
           <div className="text-gray-950 mb-2">
             if supplier ?{" "}
             <a

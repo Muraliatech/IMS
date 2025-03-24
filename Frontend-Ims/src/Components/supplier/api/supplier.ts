@@ -1,7 +1,7 @@
 // api/supplier.js
 import axios from 'axios';
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://ims-clxd.onrender.com";
 
 
 export type ProposePriceResponse = unknown;
@@ -27,7 +27,7 @@ export const initiateQualityCheck = async (orderId: number) => {
     return response.data;
 };
 
-type UpdateShippingStatusResponse=unknown
+type UpdateShippingStatusResponse = unknown
 
 interface UpdateShippingStatusRequest {
     status: string;
