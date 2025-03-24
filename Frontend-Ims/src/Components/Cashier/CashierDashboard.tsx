@@ -95,7 +95,7 @@ const CashierDashboard = () => {
   return (
     <div>
 
-<div className="flex justify-between  bg-gray-200 mt-10 ml-10 mr-10 p-5  rounded-2xl opacity-80 shadow-lg static">
+<div className="flex justify-between  bg-gray-200 mt-10 ml-10 mr-10 p-5  rounded-2xl opacity-80 shadow-lg static ">
         <div>
           <ul className="flex space-x-20 cursor-pointer">
             <li>

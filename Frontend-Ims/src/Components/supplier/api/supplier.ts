@@ -1,21 +1,17 @@
 // api/supplier.js
 import axios from 'axios';
 
-const API_URL = "https://ims-clxd.onrender.com/api";
+const API_URL = "http://localhost:5000";
 
 
-export interface ProposePriceResponse {
-    // Define the structure of the response data if known
-}
+export type ProposePriceResponse = unknown;
 
 export const proposePriceForOrder = async (orderId: string, price: number): Promise<ProposePriceResponse> => {
     const response = await axios.patch<ProposePriceResponse>(`${API_URL}/supplier/proposePriceForOrder/${orderId}`, { price });
     return response.data;
 };
 
-interface UpdateProductionStatusResponse {
-    // Define the structure of the response data if known
-}
+type UpdateProductionStatusResponse = unknown;
 
 interface UpdateProductionStatusRequest {
     status: string;
@@ -31,9 +27,7 @@ export const initiateQualityCheck = async (orderId: number) => {
     return response.data;
 };
 
-interface UpdateShippingStatusResponse {
-    // Define the structure of the response data if known
-}
+type UpdateShippingStatusResponse=unknown
 
 interface UpdateShippingStatusRequest {
     status: string;

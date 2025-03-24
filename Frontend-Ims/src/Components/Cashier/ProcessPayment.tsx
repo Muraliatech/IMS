@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { REACT_APP_RAZORPAY_KEY_ID } from "../../../Config";
+import { LoadingBUtton } from "../LoadingButton";
 
 console.log(REACT_APP_RAZORPAY_KEY_ID);
 // Define the types for Razorpay response and options
@@ -48,6 +49,8 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const[loading,setLoading]=useState(false);
+
   //  const location = useLocation();
   //   const searchParams = new URLSearchParams(location.search);
   //   const orderId = searchParams.get('orderId') || '';
@@ -69,6 +72,10 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
   // Handle the payment process
   const handlePayment = () => {
+
+    if(loading) return ;
+
+    setLoading(true);
     // Ensure Razorpay SDK is loaded before proceeding
     if (!window.Razorpay) {
       console.error("Razorpay SDK not loaded");
@@ -87,7 +94,7 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
         try {
           // Send payment details to your backend for verification
           const result = await fetch(
-            "https://ims-clxd.onrender.com/api/cashier/process-payment",
+            "http://localhost:5000/api/cashier/process-payment",
             {
               method: "POST",
               headers: {
@@ -116,6 +123,10 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
           alert("Payment failed. Please try again.");
           console.error("Payment Error:", error);
         }
+        finally{
+          setLoading(false);
+        }
+
       },
       prefill: {
         name: "Your Name", // Prefill customer details
@@ -134,12 +145,12 @@ export const ProcessPayment: React.FC<ProcessPaymentProps> = ({
 
   return (
     <div>
-      <button
+      {loading ? <LoadingBUtton/>:<button
         onClick={handlePayment}
-        className="w-full bg-blue-600 hover:bg-blue-800 text-white px-2 py-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full h-12 bg-blue-600 hover:bg-blue-900 text-white py-2 px-17 rounded-lg flex items-center justify-center  cursor-pointer"
       >
         Pay
-      </button>
+      </button>}
     </div>
   );
 };

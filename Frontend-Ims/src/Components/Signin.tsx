@@ -13,7 +13,7 @@
 //     }
 //     const handleSubmit =async()=>{
 //        try{
-//         const response  = await axios.post('https://ims-clxd.onrender.comauth/login', {
+//         const response  = await axios.post('http://localhost:5000auth/login', {
 //             email:email,
 //             password:password
 
@@ -114,6 +114,7 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LoadingBUtton } from "./LoadingButton";
 //import { useAuth } from "./AuthContext"; // Import AuthContext
 
 export const Signin = () => {
@@ -122,7 +123,7 @@ export const Signin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+ const [loading,setLoading]=useState(false);
   const navigate = useNavigate();
 
   const handleSignup = () => {
@@ -130,9 +131,11 @@ export const Signin = () => {
   };
 
   const handleSubmit = async () => {
+    if(loading){return;}
+    setLoading(true);
     try {
       const response = await axios.post(
-        "https://ims-clxd.onrender.com/api/auth/login",
+        "http://localhost:5000/api/auth/login",
         {
           email,
           password,
@@ -156,6 +159,8 @@ export const Signin = () => {
         (err as AxiosError<{ message: string }>).response?.data?.message ||
           "Something went wrong. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -207,14 +212,14 @@ export const Signin = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className="w-full flex justify-center">
-            <button
-              onClick={handleSubmit}
-              className="bg-blue-600 text-white px-10 py-2 rounded hover:bg-sky-600 font-sans cursor-pointer mb-2"
-            >
-              Sign in
-            </button>
-          </div>
+          {loading ? <LoadingBUtton/> : <div className="w-full flex justify-center">
+          <button
+            onClick={handleSubmit}
+            className="bg-blue-600 text-white px-10 py-2 rounded hover:bg-sky-600 font-sans cursor-pointer mb-2"
+          >
+            Sign in
+          </button>
+        </div>}
           <div className="text-gray-950 mb-2">
             if supplier ?{" "}
             <a

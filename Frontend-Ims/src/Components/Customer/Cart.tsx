@@ -3,14 +3,19 @@ import { useCart } from './CardContext';
 import { Navbar } from "./Navbar";
 import { BACKEND_URL } from '../../../Config';
 import { useState } from 'react';
+import { LoadingBUtton } from '../LoadingButton';
 
 export const Cart = () => {
   const { cartItems, removeFromCart, incrementQuantity, decrementQuantity } = useCart();
 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [loading,setLoading]=useState(false);
 
   const handleOrder = async () => {
+    if(loading)return;
+
+    setLoading(true);
     if (cartItems.length === 0) {
       setError("Cart is empty. Add items before ordering.");
       return;
@@ -42,6 +47,9 @@ export const Cart = () => {
     } catch (err) {
       setError("Error placing order. Please try again.");
       console.error(err);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -113,12 +121,16 @@ export const Cart = () => {
           <div className='text-xl font-bold mb-4'>
             Total: ₹{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
           </div>
-          <button 
-            onClick={handleOrder} 
-            className='bg-blue-600 py-2 px-6 rounded-xl text-lg text-white cursor-pointer hover:bg-blue-800 transition duration-200 mb-10'
-          >
-            Buy
-          </button>
+                  {loading ? <LoadingBUtton/> : <div className="w-full flex justify-center">
+                  <button
+                    onClick={handleOrder}
+                    className="bg-blue-600 text-white px-10 py-2 rounded hover:bg-sky-600 font-sans cursor-pointer mb-2"
+                  >
+                    Buy
+                  </button>
+                </div>}
+
+          
         </div>
       )}
     </div>
