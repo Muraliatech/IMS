@@ -515,6 +515,15 @@ export const LandingPage = () => {
           </div>
         </motion.div>
       </section>
+
+      <div className="flex bg-white text-black">
+        <div className="p-5 shadow-lg">
+             Customer 
+        </div>
+        <div>
+            Cashier
+        </div>
+      </div>
     </div>
   );
 };
